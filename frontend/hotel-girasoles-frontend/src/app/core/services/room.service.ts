@@ -5,6 +5,7 @@ import {
   Room,
   RoomStatus
 } from '../models/hotel.models';
+import { environment } from '../../../environments/environment';
 
 @Injectable({
   providedIn: 'root'
@@ -14,7 +15,7 @@ export class RoomService {
   private readonly http = inject(HttpClient);
 
   private readonly apiUrl =
-    'https://hotelgirasoles-backend.onrender.com/api/rooms';
+    `${environment.apiUrl}/api/rooms`;
 
   getAll(): Observable<Room[]> {
     return this.http.get<Room[]>(this.apiUrl);
@@ -66,4 +67,3 @@ export class RoomService {
     );
   }
 }
-

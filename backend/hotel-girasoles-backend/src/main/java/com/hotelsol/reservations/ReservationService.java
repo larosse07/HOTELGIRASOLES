@@ -2,6 +2,7 @@ package com.hotelsol.reservations;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.List;
 
 import com.hotelsol.cash.CashMovementType;
@@ -12,12 +13,13 @@ import com.hotelsol.consumptions.ConsumptionService;
 import com.hotelsol.rooms.Room;
 import com.hotelsol.rooms.RoomRepository;
 import com.hotelsol.rooms.RoomStatus;
-
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
 public class ReservationService {
+
+        private static final ZoneId HOTEL_ZONE = ZoneId.of("America/Lima");
 
         private final ReservationRepository reservationRepository;
         private final RoomRepository roomRepository;
@@ -103,36 +105,45 @@ public class ReservationService {
                 }
 
                 if (reservation.getPaymentMethod() == null) {
+
                         throw new RuntimeException(
                                         "Debe seleccionar un método de pago");
                 }
 
-                LocalDateTime checkIn = LocalDateTime.now();
+                LocalDateTime checkIn = LocalDateTime.now(HOTEL_ZONE);
 
-                reservation.setCheckIn(checkIn);
+                reservation.setCheckIn(
+                                checkIn);
 
                 reservation.setEstimatedCheckOut(
                                 checkIn.plusHours(
                                                 reservation.getDurationHours()));
 
-                reservation.setFinishedAt(null);
+                reservation.setFinishedAt(
+                                null);
 
-                reservation.setRoom(room);
+                reservation.setRoom(
+                                room);
 
                 if (reservation.getRoomPrice() == null
                                 || reservation.getRoomPrice()
                                                 .compareTo(BigDecimal.ZERO) <= 0) {
 
-                        reservation.setRoomPrice(room.getPrice());
+                        reservation.setRoomPrice(
+                                        room.getPrice());
                 }
 
                 reservation.setStatus(
                                 ReservationStatus.ACTIVA);
 
-                Reservation saved = reservationRepository.save(reservation);
+                Reservation saved = reservationRepository.save(
+                                reservation);
 
-                room.setStatus(RoomStatus.OCUPADA);
-                roomRepository.save(room);
+                room.setStatus(
+                                RoomStatus.OCUPADA);
+
+                roomRepository.save(
+                                room);
 
                 cashService.register(
                                 CashMovementType.RESERVA,
@@ -155,26 +166,18 @@ public class ReservationService {
                                         "La reserva no está activa");
                 }
 
-                /*
-                 * Antes de finalizar la reserva,
-                 * cobramos automáticamente todos
-                 * los consumos que quedaron pendientes.
-                 */
                 List<Consumption> consumptions = consumptionService
-                                .findByReservation(reservation.getId());
+                                .findByReservation(
+                                                reservation.getId());
 
                 for (Consumption consumption : consumptions) {
 
                         if (consumption.getPaymentStatus() == ConsumptionPaymentStatus.SIN_PAGAR) {
 
-                                /*
-                                 * Si el consumo no tiene método de pago,
-                                 * usamos el mismo método de pago de
-                                 * la reserva.
-                                 */
                                 PaymentMethod paymentMethod = consumption.getPaymentMethod();
 
                                 if (paymentMethod == null) {
+
                                         paymentMethod = reservation.getPaymentMethod();
                                 }
 
@@ -184,30 +187,22 @@ public class ReservationService {
                         }
                 }
 
-                /*
-                 * Guardamos la hora REAL en la que
-                 * se finaliza la reserva.
-                 */
                 reservation.setFinishedAt(
-                                LocalDateTime.now());
+                                LocalDateTime.now(HOTEL_ZONE));
 
-                /*
-                 * La reserva ya terminó.
-                 */
                 reservation.setStatus(
                                 ReservationStatus.FINALIZADA);
 
-                /*
-                 * La habitación queda pendiente
-                 * de limpieza.
-                 */
                 Room room = reservation.getRoom();
 
-                room.setStatus(RoomStatus.LIMPIEZA);
+                room.setStatus(
+                                RoomStatus.LIMPIEZA);
 
-                roomRepository.save(room);
+                roomRepository.save(
+                                room);
 
-                return reservationRepository.save(reservation);
+                return reservationRepository.save(
+                                reservation);
         }
 
         @Transactional
@@ -226,10 +221,13 @@ public class ReservationService {
 
                 Room room = reservation.getRoom();
 
-                room.setStatus(RoomStatus.DISPONIBLE);
+                room.setStatus(
+                                RoomStatus.DISPONIBLE);
 
-                roomRepository.save(room);
+                roomRepository.save(
+                                room);
 
-                return reservationRepository.save(reservation);
+                return reservationRepository.save(
+                                reservation);
         }
 }

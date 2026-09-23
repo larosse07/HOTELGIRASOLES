@@ -6,6 +6,7 @@ import {
   NewConsumption,
   PaymentMethod
 } from '../models/hotel.models';
+import { environment } from '../../../environments/environment';
 
 @Injectable({
   providedIn: 'root'
@@ -15,7 +16,7 @@ export class ConsumptionService {
   private readonly http = inject(HttpClient);
 
   private readonly apiUrl =
-    'https://hotelgirasoles-backend.onrender.com/api/consumptions';
+    `${environment.apiUrl}/api/consumptions`;
 
   getAll(): Observable<Consumption[]> {
     return this.http.get<Consumption[]>(
@@ -61,4 +62,3 @@ export class ConsumptionService {
     );
   }
 }
-

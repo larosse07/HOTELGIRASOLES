@@ -351,8 +351,10 @@
             </span>
 
             <span class="added-product__detail">
+
               {{ item.quantity }} ×
               S/ {{ formatMoney(item.product.price) }}
+
             </span>
 
           </div>
@@ -508,9 +510,13 @@
       <button type="submit" class="submit-button" [disabled]="saving">
 
         @if (saving) {
+
         Guardando...
+
         } @else {
+
         Registrar gasto
+
         }
 
       </button>

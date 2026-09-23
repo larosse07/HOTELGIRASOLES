@@ -486,6 +486,27 @@ export class CashComponent implements OnInit {
     this.load();
   }
 
+  private resetDisplayedTotals(): void {
+
+    this.totalEfectivo = 0;
+
+    this.totalPLIN = 0;
+
+    this.totalGeneral = 0;
+
+    this.totalExpenses = 0;
+
+    this.cashCollected = 0;
+
+    this.expectedCash = 0;
+
+    this.initialBalance = 0;
+
+    this.finalCash = 0;
+
+    this.cdr.detectChanges();
+  }
+
   setCurrentMonth(): void {
 
     this.timeFilter =
@@ -598,6 +619,8 @@ export class CashComponent implements OnInit {
 
     this.successMessage = '';
 
+    this.resetDisplayedTotals();
+
     forkJoin({
 
       movements:
@@ -691,150 +714,105 @@ export class CashComponent implements OnInit {
 
     this.successMessage = '';
 
-    const now =
-      this.dateFromString(
-        this.getLocalDate()
-      );
+    this.resetDisplayedTotals();
 
-    const year =
-      now.getFullYear();
+    const currentMonth =
+      this.getLocalDate()
+        .substring(0, 7);
 
-    const month =
-      now.getMonth();
+    forkJoin({
 
-    const days =
-      new Date(
-        year,
-        month + 1,
-        0
-      ).getDate();
+      movements:
+        this.cashService
+          .getAll()
+          .pipe(
+            map(
+              movements =>
+                movements.filter(
+                  movement =>
+                    this.getDateFromIso(
+                      movement.createdAt
+                    ).substring(0, 7) ===
+                    currentMonth
+                )
+            ),
+            catchError(
+              () => {
 
-    const requests:
-      Observable<CashMovement[]>[] = [];
+                throw new Error(
+                  'No se pudieron cargar los movimientos del mes.'
+                );
 
-    for (
-      let day = 1;
-      day <= days;
-      day++
-    ) {
-
-      const date =
-        this.toDateInput(
-          new Date(
-            year,
-            month,
-            day
-          )
-        );
-
-      requests.push(
-        this.loadMovementsForDate(
-          date
-        )
-      );
-    }
-
-    forkJoin(requests)
-      .subscribe({
-
-        next: results => {
-
-          this.movements =
-            results.flat();
-
-          this.reservationService
-            .getAll()
-            .pipe(
-              catchError(
-                () => {
-
-                  throw new Error(
-                    'No se pudieron cargar las reservas.'
-                  );
-
-                }
-              )
-            )
-            .subscribe({
-
-              next: reservations => {
-
-                this.reservations =
-                  reservations;
-
-                this.consumptionService
-                  .getAll()
-                  .pipe(
-                    catchError(
-                      () => {
-
-                        throw new Error(
-                          'No se pudieron cargar los consumos.'
-                        );
-
-                      }
-                    )
-                  )
-                  .subscribe({
-
-                    next: consumptions => {
-
-                      this.consumptions =
-                        consumptions;
-
-                      this.loadLocalCashDataForMonth();
-
-                      this.buildMonthBook();
-
-                      this.calculateMonthTotals();
-
-                      this.loading = false;
-
-                      this.cdr.detectChanges();
-                    },
-
-                    error: error => {
-
-                      this.loading = false;
-
-                      this.errorMessage =
-                        error?.message ||
-                        'No se pudieron cargar los consumos del mes.';
-
-                      this.cdr.detectChanges();
-                    }
-
-                  });
-
-              },
-
-              error: error => {
-
-                this.loading = false;
-
-                this.errorMessage =
-                  error?.message ||
-                  'No se pudieron cargar las reservas del mes.';
-
-                this.cdr.detectChanges();
               }
+            )
+          ),
 
-            });
+      reservations:
+        this.reservationService
+          .getAll()
+          .pipe(
+            catchError(
+              () => {
 
-        },
+                throw new Error(
+                  'No se pudieron cargar las reservas.'
+                );
 
-        error: error => {
+              }
+            )
+          ),
 
-          this.loading = false;
+      consumptions:
+        this.consumptionService
+          .getAll()
+          .pipe(
+            catchError(
+              () => {
 
-          this.errorMessage =
-            error?.message ||
-            'No se pudo cargar el historial mensual.';
+                throw new Error(
+                  'No se pudieron cargar los consumos.'
+                );
 
-          this.cdr.detectChanges();
-        }
+              }
+            )
+          )
 
-      });
+    }).subscribe({
+
+      next: data => {
+
+        this.movements =
+          data.movements;
+
+        this.reservations =
+          data.reservations;
+
+        this.consumptions =
+          data.consumptions;
+
+        this.loadLocalCashDataForMonth();
+
+        this.buildMonthBook();
+
+        this.calculateMonthTotals();
+
+        this.loading = false;
+
+        this.cdr.detectChanges();
+      },
+
+      error: error => {
+
+        this.loading = false;
+
+        this.errorMessage =
+          error?.message ||
+          'No se pudo cargar la información de este mes.';
+
+        this.cdr.detectChanges();
+      }
+
+    });
   }
 
   // =========================================================
@@ -951,10 +929,11 @@ export class CashComponent implements OnInit {
         .getAllExpenses();
 
     const currentMonth =
-      this.selectedDate.substring(
-        0,
-        7
-      );
+      this.getLocalDate()
+        .substring(
+          0,
+          7
+        );
 
     this.expenses =
       allExpenses.filter(
@@ -1206,6 +1185,10 @@ export class CashComponent implements OnInit {
       row: CashBookRow;
     }> = [];
 
+    // Búsqueda rápida de habitaciones (se arma una sola vez)
+    const roomLookup =
+      this.buildRoomLookup();
+
     // =======================================================
     // RESERVAS Y CONSUMOS
     // =======================================================
@@ -1231,47 +1214,11 @@ export class CashComponent implements OnInit {
           ? amount
           : 0;
 
-      let room =
-        '—';
-
-      if (
-        movement.movementType ===
-        'RESERVA'
-      ) {
-
-        const reservation =
-          this.reservations.find(
-            item =>
-              Number(item.id) ===
-              Number(movement.referenceId)
-          );
-
-        room =
-          reservation
-            ?.room
-            ?.roomNumber ||
-          '—';
-      }
-
-      if (
-        movement.movementType ===
-        'CONSUMO'
-      ) {
-
-        const consumption =
-          this.consumptions.find(
-            item =>
-              Number(item.id) ===
-              Number(movement.referenceId)
-          );
-
-        room =
-          consumption
-            ?.reservation
-            ?.room
-            ?.roomNumber ||
-          '—';
-      }
+      const room =
+        this.getRoomFromLookup(
+          movement,
+          roomLookup
+        );
 
       events.push({
 
@@ -1776,7 +1723,7 @@ export class CashComponent implements OnInit {
     }
 
     // =======================================================
-    // ORDENAR
+    // ORDENAR (del más antiguo al más nuevo, para el saldo)
     // =======================================================
 
     events.sort(
@@ -1784,10 +1731,10 @@ export class CashComponent implements OnInit {
 
         const difference =
           new Date(
-            b.date
+            a.date
           ).getTime() -
           new Date(
-            a.date
+            b.date
           ).getTime();
 
         if (
@@ -1797,14 +1744,14 @@ export class CashComponent implements OnInit {
         }
 
         return (
-          b.priority -
-          a.priority
+          a.priority -
+          b.priority
         );
       }
     );
 
     // =======================================================
-    // SALDO CORRIDO
+    // SALDO CORRIDO (en orden cronológico)
     // =======================================================
 
     for (
@@ -1838,9 +1785,21 @@ export class CashComponent implements OnInit {
         this.roundMoney(
           runningBalance
         );
+    }
+
+    // =======================================================
+    // MOSTRAR: lo más nuevo primero (igual que antes)
+    // =======================================================
+
+    for (
+      let index =
+        events.length - 1;
+      index >= 0;
+      index--
+    ) {
 
       rows.push(
-        row
+        events[index].row
       );
     }
 
@@ -1870,6 +1829,10 @@ export class CashComponent implements OnInit {
             ).getTime()
         );
 
+    // Búsqueda rápida de habitaciones (se arma una sola vez)
+    const roomLookup =
+      this.buildRoomLookup();
+
     // -------------------------------------------------------
     // HABITACIONES / CONSUMOS
     // -------------------------------------------------------
@@ -1879,8 +1842,9 @@ export class CashComponent implements OnInit {
     ) {
 
       const room =
-        this.getMovementRoom(
-          movement
+        this.getRoomFromLookup(
+          movement,
+          roomLookup
         );
 
       rows.push({
@@ -2245,6 +2209,74 @@ export class CashComponent implements OnInit {
   }
 
   // =========================================================
+  // BÚSQUEDA RÁPIDA DE HABITACIONES
+  // =========================================================
+
+  private buildRoomLookup(): {
+    reservation: Map<number, string>;
+    consumption: Map<number, string>;
+  } {
+
+    const reservation =
+      new Map<number, string>();
+
+    for (
+      const item of this.reservations
+    ) {
+
+      reservation.set(
+        Number(item.id),
+        item.room?.roomNumber ||
+        '—'
+      );
+    }
+
+    const consumption =
+      new Map<number, string>();
+
+    for (
+      const item of this.consumptions
+    ) {
+
+      consumption.set(
+        Number(item.id),
+        item.reservation
+          ?.room
+          ?.roomNumber ||
+        '—'
+      );
+    }
+
+    return {
+      reservation,
+      consumption
+    };
+  }
+
+  private getRoomFromLookup(
+    movement: CashMovement,
+    lookup: {
+      reservation: Map<number, string>;
+      consumption: Map<number, string>;
+    }
+  ): string {
+
+    const source =
+      movement.movementType ===
+        'RESERVA'
+        ? lookup.reservation
+        : lookup.consumption;
+
+    return (
+      source.get(
+        Number(
+          movement.referenceId
+        )
+      ) ||
+      '—'
+    );
+  }
+  // =========================================================
   // FILTROS
   // =========================================================
 
@@ -2526,6 +2558,32 @@ export class CashComponent implements OnInit {
   }
 
   // =========================================================
+  // RECARGAR LA VISTA ACTUAL (respeta HOY / AYER / FECHA / MES)
+  // =========================================================
+
+  private reloadCurrentView(
+    successMessage = ''
+  ): void {
+
+    if (
+      this.timeFilter ===
+      'ESTE_MES'
+    ) {
+
+      this.loadCurrentMonth();
+
+    } else {
+
+      this.load();
+    }
+
+    // load() limpia los mensajes al empezar,
+    // por eso el mensaje de éxito se pone después.
+    this.successMessage =
+      successMessage;
+  }
+
+  // =========================================================
   // APERTURA
   // =========================================================
 
@@ -2640,10 +2698,9 @@ export class CashComponent implements OnInit {
     this.showOpenShiftModal =
       false;
 
-    this.successMessage =
-      `Turno iniciado por ${name}.`;
-
-    this.load();
+    this.reloadCurrentView(
+      `Turno iniciado por ${name}.`
+    );
   }
 
   // =========================================================
@@ -2651,6 +2708,24 @@ export class CashComponent implements OnInit {
   // =========================================================
 
   openHandoffModal(): void {
+
+    this.errorMessage = '';
+
+    this.successMessage = '';
+
+    // El cierre calcula el efectivo esperado con los datos que
+    // están en pantalla; en ESTE MES o en otra fecha saldría mal.
+    if (
+      this.timeFilter ===
+      'ESTE_MES' ||
+      !this.isToday()
+    ) {
+
+      this.errorMessage =
+        'Para cerrar la caja cambia a la vista HOY.';
+
+      return;
+    }
 
     this.currentShift =
       this.shiftService
@@ -2743,13 +2818,15 @@ export class CashComponent implements OnInit {
       return;
     }
 
+    const message =
+      `Caja cerrada por ${this.currentShift.personName}. Efectivo encontrado: S/ ${this.formatMoney(counted)}.`;
+
     this.showHandoffModal =
       false;
 
-    this.successMessage =
-      `Caja cerrada por ${this.currentShift.personName}. Efectivo encontrado: S/ ${this.formatMoney(counted)}.`;
-
-    this.load();
+    this.reloadCurrentView(
+      message
+    );
   }
 
   // =========================================================
@@ -2835,10 +2912,9 @@ export class CashComponent implements OnInit {
     this.showExpenseModal =
       false;
 
-    this.successMessage =
-      'Egreso registrado correctamente.';
-
-    this.load();
+    this.reloadCurrentView(
+      'Egreso registrado correctamente.'
+    );
   }
 
   // =========================================================

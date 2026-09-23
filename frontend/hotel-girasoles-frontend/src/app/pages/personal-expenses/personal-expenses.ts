@@ -1,4 +1,6 @@
-﻿import {
+﻿
+import {
+  ChangeDetectorRef,
   Component,
   OnInit,
   inject
@@ -48,6 +50,9 @@ export class PersonalExpensesComponent implements OnInit {
 
   private readonly productService =
     inject(ProductService);
+
+  private readonly cdr =
+    inject(ChangeDetectorRef);
 
 
   // =========================================================
@@ -140,6 +145,8 @@ export class PersonalExpensesComponent implements OnInit {
 
           this.calculateTotal();
 
+          this.cdr.detectChanges();
+
         },
 
         error: () => {
@@ -150,6 +157,8 @@ export class PersonalExpensesComponent implements OnInit {
 
           this.errorMessage =
             'No se pudieron cargar los productos.';
+
+          this.cdr.detectChanges();
 
         }
 
@@ -566,7 +575,6 @@ export class PersonalExpensesComponent implements OnInit {
     const reason =
       this.description.trim();
 
-
     if (!worker) {
 
       this.errorMessage =
@@ -577,7 +585,11 @@ export class PersonalExpensesComponent implements OnInit {
     }
 
 
-    if (!reason) {
+    // El motivo solo es obligatorio para gastos directos de Caja.
+    if (
+      this.expenseMode === 'CASH' &&
+      !reason
+    ) {
 
       this.errorMessage =
         'Ingresa el motivo del gasto.';
@@ -713,6 +725,8 @@ export class PersonalExpensesComponent implements OnInit {
 
     this.saving = true;
 
+    this.cdr.detectChanges();
+
 
     const stockRequests =
       this.addedProducts.map(
@@ -731,6 +745,8 @@ export class PersonalExpensesComponent implements OnInit {
         finalize(() => {
 
           this.saving = false;
+
+          this.cdr.detectChanges();
 
         })
 
@@ -835,12 +851,21 @@ export class PersonalExpensesComponent implements OnInit {
 
             this.resetForm();
 
+
+            // ===============================================
+            // ACTUALIZAR VISTA
+            // ===============================================
+
+            this.cdr.detectChanges();
+
           } catch (error) {
 
             this.errorMessage =
               error instanceof Error
                 ? error.message
                 : 'No se pudo registrar el gasto.';
+
+            this.cdr.detectChanges();
 
           }
 
@@ -856,6 +881,8 @@ export class PersonalExpensesComponent implements OnInit {
           this.errorMessage =
             error?.error?.message ||
             'No se pudo descontar el stock de los productos.';
+
+          this.cdr.detectChanges();
 
         }
 
@@ -875,6 +902,8 @@ export class PersonalExpensesComponent implements OnInit {
   ): void {
 
     this.saving = true;
+
+    this.cdr.detectChanges();
 
 
     try {
@@ -917,6 +946,8 @@ export class PersonalExpensesComponent implements OnInit {
 
       this.resetForm();
 
+      this.cdr.detectChanges();
+
 
     } catch (error) {
 
@@ -926,6 +957,8 @@ export class PersonalExpensesComponent implements OnInit {
         error instanceof Error
           ? error.message
           : 'No se pudo registrar el gasto.';
+
+      this.cdr.detectChanges();
 
     }
 
@@ -983,6 +1016,8 @@ export class PersonalExpensesComponent implements OnInit {
             this.errorMessage =
               'No se pudo devolver el producto al stock. El gasto no fue eliminado.';
 
+            this.cdr.detectChanges();
+
           }
 
         });
@@ -1016,6 +1051,8 @@ export class PersonalExpensesComponent implements OnInit {
       this.errorMessage =
         'No se pudo eliminar el gasto.';
 
+      this.cdr.detectChanges();
+
       return;
 
     }
@@ -1036,6 +1073,8 @@ export class PersonalExpensesComponent implements OnInit {
       this.loadProducts();
 
     }
+
+    this.cdr.detectChanges();
 
   }
 
@@ -1216,3 +1255,4 @@ export class PersonalExpensesComponent implements OnInit {
   }
 
 }
+

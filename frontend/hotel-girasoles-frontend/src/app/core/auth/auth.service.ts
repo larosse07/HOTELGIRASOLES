@@ -1,6 +1,9 @@
-﻿import { Injectable, inject } from '@angular/core';
+﻿
+import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable, tap } from 'rxjs';
+
+import { environment } from '../../../environments/environment';
 
 interface LoginResponse {
   token: string;
@@ -14,30 +17,61 @@ interface LoginResponse {
 export class AuthService {
 
   private readonly http = inject(HttpClient);
-  private readonly apiUrl = 'https://hotelgirasoles-backend.onrender.com/api/auth';
 
-  login(username: string, password: string): Observable<LoginResponse> {
+  private readonly apiUrl =
+    `${environment.apiUrl}/api/auth`;
+
+  login(
+    username: string,
+    password: string
+  ): Observable<LoginResponse> {
+
     return this.http.post<LoginResponse>(
       `${this.apiUrl}/login`,
       { username, password }
     ).pipe(
       tap(response => {
-        localStorage.setItem('hotel_token', response.token);
-        localStorage.setItem('hotel_username', response.username);
-        localStorage.setItem('hotel_role', response.role);
+
+        localStorage.setItem(
+          'hotel_token',
+          response.token
+        );
+
+        localStorage.setItem(
+          'hotel_username',
+          response.username
+        );
+
+        localStorage.setItem(
+          'hotel_role',
+          response.role
+        );
       })
     );
   }
 
   enterReception(): Observable<LoginResponse> {
+
     return this.http.post<LoginResponse>(
       `${this.apiUrl}/reception`,
       {}
     ).pipe(
       tap(response => {
-        localStorage.setItem('hotel_token', response.token);
-        localStorage.setItem('hotel_username', response.username);
-        localStorage.setItem('hotel_role', response.role);
+
+        localStorage.setItem(
+          'hotel_token',
+          response.token
+        );
+
+        localStorage.setItem(
+          'hotel_username',
+          response.username
+        );
+
+        localStorage.setItem(
+          'hotel_role',
+          response.role
+        );
       })
     );
   }
@@ -63,9 +97,17 @@ export class AuthService {
   }
 
   logout(): void {
-    localStorage.removeItem('hotel_token');
-    localStorage.removeItem('hotel_username');
-    localStorage.removeItem('hotel_role');
+
+    localStorage.removeItem(
+      'hotel_token'
+    );
+
+    localStorage.removeItem(
+      'hotel_username'
+    );
+
+    localStorage.removeItem(
+      'hotel_role'
+    );
   }
 }
-

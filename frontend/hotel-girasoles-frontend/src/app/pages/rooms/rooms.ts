@@ -543,17 +543,74 @@ export class RoomsComponent implements OnInit {
     const year =
       date.getFullYear();
 
-    const hours =
-      String(
-        date.getHours()
-      ).padStart(2, '0');
+    let hours =
+      date.getHours();
 
     const minutes =
       String(
         date.getMinutes()
       ).padStart(2, '0');
 
-    return `${day}/${month}/${year} ${hours}:${minutes}`;
+    const period =
+      hours >= 12
+        ? 'PM'
+        : 'AM';
+
+    hours =
+      hours % 12 || 12;
+
+    const formattedHours =
+      String(
+        hours
+      ).padStart(2, '0');
+
+    return `${day}/${month}/${year} ${formattedHours}:${minutes} ${period}`;
+
+  }
+
+  formatReservationTime(
+    dateTime: string
+  ): string {
+
+    if (!dateTime) {
+
+      return '';
+
+    }
+
+    const match =
+      dateTime.match(
+        /T(\d{2}):(\d{2})/
+      );
+
+    if (!match) {
+
+      return '';
+
+    }
+
+    let hours =
+      Number(
+        match[1]
+      );
+
+    const minutes =
+      match[2];
+
+    const period =
+      hours >= 12
+        ? 'PM'
+        : 'AM';
+
+    hours =
+      hours % 12 || 12;
+
+    const formattedHours =
+      String(
+        hours
+      ).padStart(2, '0');
+
+    return `${formattedHours}:${minutes} ${period}`;
 
   }
 
@@ -630,6 +687,8 @@ export class RoomsComponent implements OnInit {
       room.id;
 
     this.error = '';
+
+    this.updateEstimatedCheckOut();
 
     window.scrollTo({
 
@@ -775,10 +834,10 @@ export class RoomsComponent implements OnInit {
       },
 
       checkIn:
-        checkIn.toISOString(),
+        this.toLocalDateTime(checkIn),
 
       estimatedCheckOut:
-        checkOut.toISOString(),
+        this.toLocalDateTime(checkOut),
 
       durationHours:
         duration,
@@ -867,7 +926,47 @@ export class RoomsComponent implements OnInit {
 
     this.paymentOpen = false;
 
-    this.updateEstimatedCheckOut();
+    this.estimatedCheckOutLabel = '';
+
+  }
+
+  private toLocalDateTime(
+    date: Date
+  ): string {
+
+    const pad = (
+      value: number
+    ): string => {
+
+      return String(
+        value
+      ).padStart(
+        2,
+        '0'
+      );
+
+    };
+
+    return [
+      date.getFullYear(),
+      '-',
+      pad(
+        date.getMonth() + 1
+      ),
+      '-',
+      pad(
+        date.getDate()
+      ),
+      'T',
+      pad(
+        date.getHours()
+      ),
+      ':',
+      pad(
+        date.getMinutes()
+      ),
+      ':00'
+    ].join('');
 
   }
 

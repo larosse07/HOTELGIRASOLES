@@ -1,9 +1,11 @@
-﻿import { Injectable, inject } from '@angular/core';
+﻿
+import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import {
   CashMovement
 } from '../models/hotel.models';
+import { environment } from '../../../environments/environment';
 
 @Injectable({
   providedIn: 'root'
@@ -13,7 +15,7 @@ export class CashService {
   private readonly http = inject(HttpClient);
 
   private readonly apiUrl =
-    'https://hotelgirasoles-backend.onrender.com/api/cash';
+    `${environment.apiUrl}/api/cash`;
 
   getAll(): Observable<CashMovement[]> {
     return this.http.get<CashMovement[]>(
@@ -35,4 +37,3 @@ export class CashService {
     );
   }
 }
-

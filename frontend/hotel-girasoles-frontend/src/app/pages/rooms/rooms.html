@@ -88,7 +88,8 @@
           HABITACIÓN
         </label>
 
-        <select id="roomSelect" [(ngModel)]="selectedRoomId">
+        <select id="roomSelect" [(ngModel)]="selectedRoomId" (ngModelChange)="updateEstimatedCheckOut()">
+
 
           <option [ngValue]="null">
             Seleccione una habitación
@@ -496,8 +497,9 @@
             <strong>
 
               {{
-              getActiveReservation(room.id)?.checkIn
-              | date:'h:mm a'
+              formatReservationTime(
+              getActiveReservation(room.id)?.checkIn || ''
+              )
               }}
 
             </strong>
@@ -514,8 +516,9 @@
             <strong>
 
               {{
-              getActiveReservation(room.id)?.estimatedCheckOut
-              | date:'h:mm a'
+              formatReservationTime(
+              getActiveReservation(room.id)?.estimatedCheckOut || ''
+              )
               }}
 
             </strong>

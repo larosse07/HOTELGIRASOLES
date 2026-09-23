@@ -3,6 +3,7 @@ import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 
 import { Product } from '../models/hotel.models';
+import { environment } from '../../../environments/environment';
 
 @Injectable({
   providedIn: 'root'
@@ -12,7 +13,7 @@ export class ProductService {
   private readonly http = inject(HttpClient);
 
   private readonly apiUrl =
-    'https://hotelgirasoles-backend.onrender.com/api/products';
+    `${environment.apiUrl}/api/products`;
 
 
   getAll(): Observable<Product[]> {

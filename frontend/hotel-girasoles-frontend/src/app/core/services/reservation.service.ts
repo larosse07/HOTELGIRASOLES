@@ -6,6 +6,7 @@ import {
   ReservationStatus,
   NewReservation
 } from '../models/hotel.models';
+import { environment } from '../../../environments/environment';
 
 @Injectable({
   providedIn: 'root'
@@ -15,7 +16,7 @@ export class ReservationService {
   private readonly http = inject(HttpClient);
 
   private readonly apiUrl =
-    'https://hotelgirasoles-backend.onrender.com/api/reservations';
+    `${environment.apiUrl}/api/reservations`;
 
   getAll(): Observable<Reservation[]> {
     return this.http.get<Reservation[]>(this.apiUrl);
@@ -68,4 +69,3 @@ export class ReservationService {
     );
   }
 }
-
