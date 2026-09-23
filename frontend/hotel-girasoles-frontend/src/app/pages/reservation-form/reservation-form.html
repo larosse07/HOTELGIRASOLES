@@ -1,0 +1,253 @@
+﻿<div class="page reservation-page">
+
+  <div class="page-header">
+
+    <div>
+      <div class="eyebrow">RECEPCIÓN</div>
+
+      <h1>Nueva reserva</h1>
+
+      <p>Registra la estadía del huésped.</p>
+    </div>
+
+    <a routerLink="/reservations" class="back-button">
+      ← Volver
+    </a>
+
+  </div>
+
+
+  <form class="reservation-card" (ngSubmit)="save()">
+
+    <div class="section">
+
+      <div class="section-title">
+        Datos del huésped
+      </div>
+
+      <div class="form-grid">
+
+        <div class="field">
+
+          <label for="dni">
+            DNI
+          </label>
+
+          <input id="dni" type="text" name="dni" [(ngModel)]="guestDni" maxlength="15" placeholder="Ingrese DNI"
+            autocomplete="off" />
+
+        </div>
+
+
+        <div class="field">
+
+          <label for="name">
+            Nombre del huésped
+          </label>
+
+          <input id="name" type="text" name="name" [(ngModel)]="guestName" placeholder="Nombre del huésped"
+            autocomplete="off" />
+
+        </div>
+
+      </div>
+
+    </div>
+
+
+    <div class="section">
+
+      <div class="section-title">
+        Estadía
+      </div>
+
+
+      <div class="field">
+
+        <label>
+          Duración
+        </label>
+
+        <div class="duration-options">
+
+          <button type="button" class="choice-button" [class.active]="stayMode === 'HORAS'"
+            (click)="selectStayMode('HORAS')">
+            4 horas
+          </button>
+
+
+          <button type="button" class="choice-button" [class.active]="stayMode === 'NOCHE'"
+            (click)="selectStayMode('NOCHE')">
+            Toda la noche
+          </button>
+
+        </div>
+
+      </div>
+
+
+      <div *ngIf="stayMode === 'HORAS'" class="stay-hint">
+        Estadía de 4 horas · Habitaciones normales S/ 40 · Jacuzzi S/ 80
+      </div>
+
+
+      <div *ngIf="stayMode === 'NOCHE'" class="stay-hint">
+        Toda la noche · Habitaciones normales S/ 50
+      </div>
+
+
+      <div class="field room-field">
+
+        <label for="room">
+          Habitación disponible
+        </label>
+
+        <select id="room" name="room" [(ngModel)]="selectedRoomId">
+
+          <option [ngValue]="null">
+            Seleccionar habitación
+          </option>
+
+
+          <option *ngFor="let room of availableRooms" [ngValue]="room.id" [disabled]="!isRoomSelectable(room)">
+            Hab. {{ room.roomNumber }}
+            · {{ room.type }}
+            · {{ getRoomPriceLabel(room) }}
+          </option>
+
+        </select>
+
+      </div>
+
+    </div>
+
+
+    <div class="section">
+
+      <div class="section-title">
+        Método de pago
+      </div>
+
+
+      <div class="payment-options">
+
+        <button type="button" class="payment-button" [class.active]="paymentMethod === 'EFECTIVO'"
+          (click)="selectPayment('EFECTIVO')">
+
+          <span class="payment-icon">
+            💵
+          </span>
+
+          <span>
+            <strong>Efectivo</strong>
+            <small>Pago en recepción</small>
+          </span>
+
+        </button>
+
+
+        <button type="button" class="payment-button" [class.active]="paymentMethod === 'PLIN'"
+          (click)="selectPayment('PLIN')">
+
+          <span class="payment-icon">
+            📱
+          </span>
+
+          <span>
+            <strong>PLIN</strong>
+            <small>Pago digital</small>
+          </span>
+
+        </button>
+
+      </div>
+
+    </div>
+
+
+    <div *ngIf="errorMessage" class="error-message">
+      {{ errorMessage }}
+    </div>
+
+
+    <div class="summary">
+
+      <div>
+
+        <span>Habitación</span>
+
+        <strong>
+          {{
+          selectedRoom
+          ? 'Hab. ' + selectedRoom.roomNumber
+          : '—'
+          }}
+        </strong>
+
+      </div>
+
+
+      <div>
+
+        <span>Duración</span>
+
+        <strong>
+          {{ durationLabel }}
+        </strong>
+
+      </div>
+
+
+      <div>
+
+        <span>Tipo</span>
+
+        <strong>
+          {{
+          selectedRoom
+          ? selectedRoom.type
+          : '—'
+          }}
+        </strong>
+
+      </div>
+
+
+      <div class="total-box">
+
+        <span>Total</span>
+
+        <strong>
+          S/ {{ total | number:'1.2-2' }}
+        </strong>
+
+      </div>
+
+    </div>
+
+
+    <!-- =====================================================
+         ACCIONES
+         ===================================================== -->
+
+    <div class="form-actions">
+
+      <a routerLink="/reservations" class="cancel-button">
+        Cancelar
+      </a>
+
+
+      <button type="button" class="product-button" (click)="addProduct()" [disabled]="saving">
+        AÑADIR PRODUCTO
+      </button>
+
+
+      <button type="submit" class="save-button" [disabled]="saving">
+        {{ saving ? 'Guardando...' : 'CREAR RESERVA' }}
+      </button>
+
+    </div>
+
+  </form>
+
+</div>

@@ -1,0 +1,676 @@
+<div class="products-page-layout">
+
+    <div class="alert alert-error" *ngIf="error">
+        {{ error }}
+    </div>
+
+    <div class="alert alert-success" *ngIf="success">
+        {{ success }}
+    </div>
+
+    <section class="products-header">
+
+        <div class="products-heading">
+
+            <div>
+                <h1 class="page-title">
+                    Habitaciones
+                </h1>
+
+                <p class="page-description">
+                    Habitaciones disponibles para las operaciones del hotel.
+                </p>
+            </div>
+
+            <button type="button" class="btn-primary" (click)="openCreateRoom()">
+
+                + Nueva habitación
+
+            </button>
+
+        </div>
+
+
+        <div class="search-row">
+
+            <div class="search-box">
+
+                <span class="search-icon">
+                    🔎
+                </span>
+
+                <input type="text" [(ngModel)]="searchTerm" placeholder="Buscar habitación..." autocomplete="off">
+
+                <button *ngIf="searchTerm" type="button" class="btn-clear-search" (click)="searchTerm = ''">
+
+                    ×
+
+                </button>
+
+            </div>
+
+
+            <div class="product-counter">
+
+                {{ filteredRooms.length }}
+
+                {{
+                filteredRooms.length === 1
+                ? 'habitación'
+                : 'habitaciones'
+                }}
+
+            </div>
+
+        </div>
+
+
+        <div class="status-filters">
+
+            <button type="button" class="status-filter" [class.active]="selectedStatus === 'TODAS'"
+                (click)="setStatusFilter('TODAS')">
+
+                Todas
+
+            </button>
+
+
+            <button type="button" class="status-filter status-filter-available"
+                [class.active]="selectedStatus === 'DISPONIBLE'" (click)="setStatusFilter('DISPONIBLE')">
+
+                Disponibles
+
+            </button>
+
+
+            <button type="button" class="status-filter status-filter-occupied"
+                [class.active]="selectedStatus === 'OCUPADA'" (click)="setStatusFilter('OCUPADA')">
+
+                Ocupadas
+
+            </button>
+
+
+            <button type="button" class="status-filter status-filter-cleaning"
+                [class.active]="selectedStatus === 'LIMPIEZA'" (click)="setStatusFilter('LIMPIEZA')">
+
+                Limpieza
+
+            </button>
+
+        </div>
+
+    </section>
+
+
+    <section class="products-table-card">
+
+        <div class="table-header">
+
+            <div>
+
+                <h2>
+                    Habitaciones registradas
+                </h2>
+
+                <span>
+                    Administración de las habitaciones del hotel
+                </span>
+
+            </div>
+
+        </div>
+
+
+        <div class="products-table-wrap">
+
+            <table class="products-table">
+
+                <thead>
+
+                    <tr>
+
+                        <th>
+                            HABITACIÓN
+                        </th>
+
+                        <th>
+                            TIPO
+                        </th>
+
+                        <th>
+                            DESCRIPCIÓN
+                        </th>
+
+                        <th>
+                            PRECIOS
+                        </th>
+
+                        <th>
+                            ESTADO
+                        </th>
+
+                        <th class="text-right">
+                            ACCIONES
+                        </th>
+
+                    </tr>
+
+                </thead>
+
+
+                <tbody>
+
+                    <tr *ngFor="let room of filteredRooms">
+
+                        <td>
+
+                            <div class="product-main">
+
+                                <span class="room-number">
+                                    {{ room.roomNumber }}
+                                </span>
+
+                            </div>
+
+                        </td>
+
+
+                        <td>
+
+                            <span class="product-category">
+                                {{ room.type }}
+                            </span>
+
+                        </td>
+
+
+                        <td>
+
+                            <span class="room-description">
+
+                                {{
+                                room.description ||
+                                'Sin descripción'
+                                }}
+
+                            </span>
+
+                        </td>
+
+
+                        <td>
+
+                            <ng-container *ngIf="!isInternalRoom(room.roomNumber); else internalRoomPrice">
+
+                                <div class="room-prices">
+
+                                    <span class="product-price">
+                                        S/ {{ room.price | number:'1.2-2' }}
+                                    </span>
+
+                                    <span class="room-night-price">
+                                        S/ {{ room.nightPrice | number:'1.2-2' }} / noche
+                                    </span>
+
+                                </div>
+
+                            </ng-container>
+
+                            <ng-template #internalRoomPrice>
+
+                                <span class="room-no-price">
+                                    —
+                                </span>
+
+                            </ng-template>
+
+                        </td>
+
+
+                        <td>
+
+                            <span class="stock-status" [ngClass]="getStatusClass(room.status)">
+
+                                {{ getStatusLabel(room.status) }}
+
+                            </span>
+
+                        </td>
+
+
+                        <td class="actions-cell">
+
+                            <button type="button" class="btn-action btn-edit" (click)="openEditRoom(room)">
+
+                                Editar
+
+                            </button>
+
+
+                            <button type="button" class="btn-action btn-delete" (click)="openDeleteRoom(room)">
+
+                                Eliminar
+
+                            </button>
+
+                        </td>
+
+                    </tr>
+
+
+                    <tr *ngIf="loading">
+
+                        <td colspan="6" class="empty-products">
+
+                            <strong>
+                                Cargando habitaciones...
+                            </strong>
+
+                        </td>
+
+                    </tr>
+
+
+                    <tr *ngIf="!loading && filteredRooms.length === 0">
+
+                        <td colspan="6" class="empty-products">
+
+                            <div class="empty-icon">
+                                —
+                            </div>
+
+
+                            <strong>
+
+                                {{
+                                searchTerm
+                                ? 'No se encontraron habitaciones'
+                                : selectedStatus !== 'TODAS'
+                                ? 'No hay habitaciones en este estado'
+                                : 'No hay habitaciones registradas'
+                                }}
+
+                            </strong>
+
+
+                            <span>
+
+                                {{
+                                searchTerm
+                                ? 'Prueba con otro número o tipo.'
+                                : selectedStatus !== 'TODAS'
+                                ? 'Cambia el filtro para ver otras habitaciones.'
+                                : 'Crea la primera habitación para comenzar.'
+                                }}
+
+                            </span>
+
+
+                            <button *ngIf="
+                                    !searchTerm &&
+                                    selectedStatus === 'TODAS'
+                                " type="button" class="btn-primary empty-button" (click)="openCreateRoom()">
+
+                                + Crear habitación
+
+                            </button>
+
+                        </td>
+
+                    </tr>
+
+                </tbody>
+
+            </table>
+
+        </div>
+
+    </section>
+
+</div>
+
+
+<!-- =====================================================
+     MODAL CREAR / EDITAR HABITACIÓN
+     ===================================================== -->
+
+<div class="modal-overlay" *ngIf="showRoomModal" (click)="closeRoomModal()">
+
+    <div class="modal-card" (click)="$event.stopPropagation()">
+
+
+        <header class="modal-header">
+
+            <div>
+
+                <span class="modal-kicker">
+                    HABITACIONES
+                </span>
+
+                <h2>
+
+                    {{
+                    editingRoom
+                    ? 'Editar habitación'
+                    : 'Nueva habitación'
+                    }}
+
+                </h2>
+
+            </div>
+
+
+            <button type="button" class="btn-modal-close" (click)="closeRoomModal()" [disabled]="saving">
+
+                ×
+
+            </button>
+
+        </header>
+
+
+        <div class="modal-body">
+
+
+            <!-- NÚMERO -->
+
+            <div class="form-group">
+
+                <label>
+                    NÚMERO DE HABITACIÓN
+                </label>
+
+                <input type="text" [(ngModel)]="roomForm.roomNumber" placeholder="Ej. 201" maxlength="20"
+                    [disabled]="saving">
+
+
+                <div class="room-number-error" *ngIf="roomNumberExists">
+
+                    ⚠ Habitación
+                    {{ roomForm.roomNumber.trim() }}
+                    ya está registrada.
+
+                </div>
+
+            </div>
+
+
+            <!-- TIPO -->
+
+            <div class="form-group">
+
+                <label>
+                    TIPO DE HABITACIÓN
+                </label>
+
+                <input type="text" [(ngModel)]="roomForm.type" placeholder="Ej. Matrimonial" maxlength="50"
+                    [disabled]="saving">
+
+            </div>
+
+
+            <!-- PRECIO 4 HORAS -->
+
+            <div class="form-group" *ngIf="!isInternalFormRoom()">
+
+                <label>
+                    PRECIO X 4H
+                </label>
+
+                <div class="input-prefix">
+
+                    <span>
+                        S/
+                    </span>
+
+                    <input type="number" [(ngModel)]="roomForm.price" min="0" step="0.10" [disabled]="saving">
+
+                </div>
+
+            </div>
+
+
+            <!-- PRECIO NOCHE -->
+
+            <div class="form-group" *ngIf="!isInternalFormRoom()">
+
+                <label>
+                    PRECIO TODA LA NOCHE
+                </label>
+
+                <div class="input-prefix">
+
+                    <span>
+                        S/
+                    </span>
+
+                    <input type="number" [(ngModel)]="roomForm.nightPrice" min="0" step="0.10" [disabled]="saving">
+
+                </div>
+
+            </div>
+
+
+            <!-- HABITACIÓN INTERNA -->
+
+            <div class="current-room-status" *ngIf="isInternalFormRoom()">
+
+                <span>
+                    HABITACIÓN INTERNA
+                </span>
+
+                <strong>
+                    SIN PRECIO
+                </strong>
+
+                <small>
+                    Las habitaciones terminadas en A son de uso interno del hotel y no tienen precio de alquiler.
+                </small>
+
+            </div>
+
+
+            <!-- DESCRIPCIÓN -->
+
+            <div class="form-group">
+
+                <label>
+                    DESCRIPCIÓN
+                </label>
+
+                <textarea [(ngModel)]="roomForm.description" placeholder="Ej. Habitación con jacuzzi" maxlength="255"
+                    rows="3" [disabled]="saving"></textarea>
+
+                <small>
+                    Puedes indicar características como jacuzzi, dos camas, etc.
+                </small>
+
+            </div>
+
+
+            <!-- ESTADO -->
+
+            <div class="form-group" *ngIf="editingRoom && editingRoom.status !== 'DISPONIBLE'">
+
+                <label>
+                    ESTADO
+                </label>
+
+                <select [(ngModel)]="roomForm.status" [disabled]="saving">
+
+                    <option value="DISPONIBLE">
+                        DISPONIBLE
+                    </option>
+
+                    <option value="OCUPADA">
+                        OCUPADA
+                    </option>
+
+                    <option value="LIMPIEZA">
+                        LIMPIEZA
+                    </option>
+
+                </select>
+
+            </div>
+
+
+            <!-- ADVERTENCIA HABITACIÓN OCUPADA -->
+
+            <div class="current-room-status" *ngIf="editingRoom && editingRoom.status === 'OCUPADA'">
+
+                <span>
+                    Estado actual
+                </span>
+
+                <strong [ngClass]="getStatusClass(editingRoom.status)">
+
+                    {{ getStatusLabel(editingRoom.status) }}
+
+                </strong>
+
+                <small>
+
+                    Esta habitación está actualmente ocupada.
+                    El administrador puede cambiar su estado manualmente.
+
+                </small>
+
+            </div>
+
+        </div>
+
+
+        <!-- BOTONES CREAR / EDITAR -->
+
+        <footer class="modal-footer">
+
+            <button type="button" class="btn-secondary" (click)="closeRoomModal()" [disabled]="saving">
+
+                Cancelar
+
+            </button>
+
+
+            <button type="button" class="btn-primary modal-save" (click)="saveRoom()"
+                [disabled]="saving || roomNumberExists">
+
+                {{
+                editingRoom
+                ? 'Guardar cambios'
+                : 'Crear habitación'
+                }}
+
+            </button>
+
+        </footer>
+
+    </div>
+
+</div>
+
+
+<!-- =====================================================
+     MODAL ELIMINAR
+     ===================================================== -->
+
+<div class="modal-overlay" *ngIf="showDeleteModal" (click)="closeDeleteModal()">
+
+    <div class="modal-card delete-modal-card" (click)="$event.stopPropagation()">
+
+
+        <header class="modal-header">
+
+            <div>
+
+                <span class="modal-kicker">
+                    HABITACIONES
+                </span>
+
+                <h2>
+                    Eliminar habitación
+                </h2>
+
+            </div>
+
+
+            <button type="button" class="btn-modal-close" (click)="closeDeleteModal()" [disabled]="saving">
+
+                ×
+
+            </button>
+
+        </header>
+
+
+        <div class="delete-modal-body" *ngIf="selectedRoom">
+
+            <div class="delete-warning-icon">
+                !
+            </div>
+
+
+            <div>
+
+                <strong>
+
+                    ¿Eliminar la habitación
+                    {{ selectedRoom.roomNumber }}?
+
+                </strong>
+
+
+                <p>
+
+                    Esta acción eliminará la habitación del sistema.
+                    Si tiene reservas asociadas, el sistema impedirá la eliminación.
+
+                </p>
+
+            </div>
+
+        </div>
+
+
+        <footer class="modal-footer">
+
+            <button type="button" class="btn-secondary" (click)="closeDeleteModal()" [disabled]="saving">
+
+                Cancelar
+
+            </button>
+
+
+            <button type="button" class="btn-danger" (click)="confirmDeleteRoom()" [disabled]="saving">
+
+                {{
+                saving
+                ? 'Eliminando...'
+                : 'Sí, eliminar'
+                }}
+
+            </button>
+
+        </footer>
+
+    </div>
+
+</div>
+
+
+<!-- =====================================================
+     NOTIFICACIÓN GUARDADO
+     ===================================================== -->
+
+<div class="save-toast" *ngIf="showSavedNotification" role="status" aria-live="polite">
+
+    <div class="save-toast-icon">
+        ✓
+    </div>
+
+    <strong>
+        Habitación guardada
+    </strong>
+
+</div>

@@ -1,0 +1,157 @@
+﻿.home {
+  min-height: 100vh;
+  padding: 55px 7%;
+  background:
+    radial-gradient(circle at 88% 8%, #FFF0B8 0, transparent 24%),
+    var(--cream);
+}
+
+.home-header {
+  max-width: 1050px;
+  margin: 0 auto 42px;
+}
+
+.home-brand {
+  display: flex;
+  align-items: center;
+  gap: 13px;
+}
+
+.home-brand .flower {
+  width: 50px;
+  height: 50px;
+  display: grid;
+  place-items: center;
+  border-radius: 14px;
+  background: var(--yellow);
+  color: #fff;
+  font-size: 27px;
+}
+
+.home-brand strong,
+.home-brand span {
+  display: block;
+}
+
+.home-brand strong {
+  font-size: 18px;
+  letter-spacing: .5px;
+}
+
+.home-brand span {
+  color: var(--terracotta);
+  font-size: 14px;
+  font-weight: 700;
+  margin-top: 4px;
+}
+
+.welcome {
+  margin-top: 55px;
+}
+
+.welcome p {
+  margin: 0 0 7px;
+  color: var(--terracotta);
+  font-size: 17px;
+  font-weight: 700;
+}
+
+.welcome h1 {
+  margin: 0;
+  font-size: 38px;
+  line-height: 1.15;
+}
+
+.menu-grid {
+  max-width: 1050px;
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 20px;
+}
+
+.menu-card {
+  min-height: 210px;
+  padding: 30px;
+  border-radius: 22px;
+  border: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  position: relative;
+  overflow: hidden;
+  transition: transform .15s ease, box-shadow .15s ease;
+}
+
+.menu-card:hover {
+  transform: translateY(-3px);
+  box-shadow: var(--shadow);
+}
+
+.room-card {
+  background: #FFF0B8;
+}
+
+.reservation-card {
+  background: #fff;
+}
+
+.product-card {
+  background: #F7EEDF;
+}
+
+.cash-card {
+  background: #F4DED4;
+}
+
+.card-symbol {
+  width: 48px;
+  height: 48px;
+  border-radius: 13px;
+  background: rgba(255,255,255,.7);
+  display: grid;
+  place-items: center;
+  font-size: 23px;
+  color: var(--terracotta);
+  font-weight: 700;
+}
+
+.menu-card h2 {
+  margin: 25px 0 8px;
+  font-size: 25px;
+}
+
+.menu-card p {
+  margin: 0;
+  max-width: 390px;
+  color: var(--brown-soft);
+  font-size: 16px;
+  line-height: 1.5;
+}
+
+.arrow {
+  position: absolute;
+  right: 28px;
+  bottom: 25px;
+  font-size: 28px;
+  font-weight: 700;
+  color: var(--terracotta);
+}
+
+@media (max-width: 700px) {
+  .home {
+    padding: 35px 18px;
+  }
+
+  .welcome {
+    margin-top: 38px;
+  }
+
+  .welcome h1 {
+    font-size: 30px;
+  }
+
+  .menu-grid {
+    grid-template-columns: 1fr;
+  }
+}

@@ -1,0 +1,1890 @@
+.consumptions-page-layout {
+
+  display: flex;
+
+  flex-direction: column;
+
+  gap: 16px;
+
+}
+
+.alert {
+
+  padding: 10px 14px;
+
+  border-radius: 8px;
+
+  font-size: 14px;
+
+  font-weight: 700;
+
+}
+
+.alert-error {
+
+  background: #fee2e2;
+
+  color: #dc2626;
+
+}
+
+.alert-success {
+
+  background: #dcfce7;
+
+  color: #16a34a;
+
+}
+
+.two-columns-grid {
+
+  display: grid;
+
+  grid-template-columns: minmax(0, 1.8fr) minmax(320px, 0.9fr);
+
+  gap: 20px;
+
+  align-items: start;
+
+}
+
+.section-title {
+
+  margin: 0 0 12px;
+
+  font-size: 21px;
+
+  font-weight: 900;
+
+  color: #1c150d;
+
+}
+
+.products-table-wrap {
+
+  background: #ffffff;
+
+  border: 1.5px solid #ebdccb;
+
+  border-radius: 12px;
+
+  overflow: hidden;
+
+  box-shadow: 0 2px 8px rgba(180, 130, 70, 0.04);
+
+}
+
+.products-table {
+
+  width: 100%;
+
+  border-collapse: collapse;
+
+}
+
+.products-table th {
+
+  background: #faf6ee;
+
+  color: #8c7d6e;
+
+  font-size: 13px;
+
+  font-weight: 900;
+
+  letter-spacing: 0.5px;
+
+  padding: 11px 16px;
+
+  text-align: left;
+
+  border-bottom: 1px solid #ebdccb;
+
+}
+
+.products-table td {
+
+  padding: 11px 16px;
+
+  border-bottom: 1px solid #f3ece0;
+
+  font-size: 15px;
+
+  color: #2b221a;
+
+  vertical-align: middle;
+
+}
+
+.product-clickable-row {
+
+  cursor: pointer;
+
+  transition: background 0.12s ease;
+
+}
+
+.product-clickable-row:hover {
+
+  background-color: #fcf6ee;
+
+}
+
+.prod-name {
+
+  color: #1c150d;
+
+  font-weight: 800;
+
+  font-size: 15px;
+
+}
+
+.prod-category {
+
+  color: #7a6b5c;
+
+  font-size: 14px;
+
+}
+
+.prod-price {
+
+  font-size: 17px;
+
+  font-weight: 900;
+
+  color: #1c150d;
+
+}
+
+.prod-stock-badge {
+
+  display: inline-block;
+
+  font-size: 13px;
+
+  font-weight: 900;
+
+  padding: 4px 9px;
+
+  border-radius: 5px;
+
+}
+
+.badge-green {
+
+  background: #dcfce7;
+
+  color: #16a34a;
+
+}
+
+.badge-orange {
+
+  background: #ffedd5;
+
+  color: #ea580c;
+
+}
+
+.badge-infinity {
+
+  font-size: 16px;
+
+  background: #f1f5f9;
+
+  color: #475569;
+
+}
+
+.consumption-order-card {
+
+  width: 100%;
+
+  max-width: 430px;
+
+  justify-self: end;
+
+  background: #faf4e8;
+
+  border: 1.5px solid #ebdccb;
+
+  border-radius: 14px;
+
+  padding: 16px;
+
+  box-shadow: 0 2px 8px rgba(180, 130, 70, 0.04);
+
+  box-sizing: border-box;
+
+}
+
+.order-form-body {
+
+  display: flex;
+
+  flex-direction: column;
+
+  gap: 10px;
+
+}
+
+.form-row-group {
+
+  display: flex;
+
+  flex-direction: column;
+
+}
+
+.group-label {
+
+  font-size: 14px;
+
+  font-weight: 900;
+
+  letter-spacing: 0.5px;
+
+  color: #7a6b5c;
+
+  margin-bottom: 5px;
+
+}
+
+.custom-select-box select {
+
+  width: 100%;
+
+  height: 40px;
+
+  border: 1px solid #e0d2bf;
+
+  border-radius: 8px;
+
+  padding: 0 10px;
+
+  font-size: 15px;
+
+  color: #2b221a;
+
+  background: #ffffff;
+
+  outline: none;
+
+  font-family: inherit;
+
+  box-sizing: border-box;
+
+}
+
+.order-table-wrap {
+
+  background: #ffffff;
+
+  border: 1px solid #ebdccb;
+
+  border-radius: 8px;
+
+  overflow: hidden;
+
+}
+
+.order-table {
+
+  width: 100%;
+
+  border-collapse: collapse;
+
+}
+
+.order-table th {
+
+  background: #faf6ee;
+
+  color: #8c7d6e;
+
+  font-size: 12px;
+
+  font-weight: 900;
+
+  padding: 7px 8px;
+
+  border-bottom: 1px solid #ebdccb;
+
+  text-align: left;
+
+}
+
+.order-table td {
+
+  padding: 7px 8px;
+
+  border-bottom: 1px solid #f3ece0;
+
+  font-size: 14px;
+
+  color: #2b221a;
+
+}
+
+.text-center {
+
+  text-align: center;
+
+}
+
+.text-right {
+
+  text-align: right;
+
+}
+
+.order-prod-name {
+
+  font-weight: 800;
+
+  color: #1c150d;
+
+}
+
+.order-price {
+
+  color: #7a6b5c;
+
+  font-size: 14px;
+
+}
+
+.order-line-sub {
+
+  font-weight: 900;
+
+  color: #1c150d;
+
+  font-size: 15px;
+
+}
+
+.empty-order-td {
+
+  text-align: center;
+
+  padding: 10px;
+
+  color: #8c7d6e;
+
+  font-size: 13px;
+
+}
+
+.quantity-control {
+
+  display: inline-flex;
+
+  align-items: center;
+
+  justify-content: center;
+
+  gap: 4px;
+
+  background: #faf6ee;
+
+  border: 1px solid #ebdccb;
+
+  border-radius: 7px;
+
+  padding: 2px 4px;
+
+}
+
+.quantity-btn {
+
+  width: 25px;
+
+  height: 25px;
+
+  border: none;
+
+  border-radius: 5px;
+
+  background: #ffffff;
+
+  color: #5c4c3e;
+
+  font-size: 18px;
+
+  font-weight: 900;
+
+  line-height: 1;
+
+  cursor: pointer;
+
+  display: flex;
+
+  align-items: center;
+
+  justify-content: center;
+
+  transition:
+
+    background 0.12s ease,
+
+    color 0.12s ease;
+
+}
+
+.quantity-btn:hover:not(:disabled) {
+
+  background: #e08714;
+
+  color: #ffffff;
+
+}
+
+.quantity-btn:disabled {
+
+  opacity: 0.35;
+
+  cursor: not-allowed;
+
+}
+
+.order-qty {
+
+  min-width: 22px;
+
+  text-align: center;
+
+  font-size: 14px;
+
+  font-weight: 900;
+
+  color: #1c150d;
+
+}
+
+.btn-trash {
+
+  background: transparent;
+
+  border: none;
+
+  cursor: pointer;
+
+  font-size: 15px;
+
+  color: #a89a8c;
+
+  padding: 2px;
+
+}
+
+.btn-trash:hover {
+
+  color: #dc2626;
+
+}
+
+.mode-badge {
+
+  display: inline-flex;
+
+  align-items: center;
+
+  align-self: flex-start;
+
+  padding: 5px 9px;
+
+  border-radius: 999px;
+
+  background: #e8f3eb;
+
+  color: #397044;
+
+  font-size: 12px;
+
+  font-weight: 900;
+
+  letter-spacing: 0.5px;
+
+  margin-bottom: 2px;
+
+}
+
+.guest-summary {
+
+  background: #ffffff;
+
+  border: 1px solid #ebdccb;
+
+  border-radius: 9px;
+
+  overflow: hidden;
+
+}
+
+.guest-summary-row {
+
+  display: flex;
+
+  justify-content: space-between;
+
+  align-items: center;
+
+  gap: 12px;
+
+  padding: 7px 10px;
+
+  border-bottom: 1px solid #f3ece0;
+
+}
+
+.guest-summary-row:last-child {
+
+  border-bottom: none;
+
+}
+
+.guest-summary-row span {
+
+  font-size: 13px;
+
+  font-weight: 900;
+
+  color: #8c7d6e;
+
+  letter-spacing: 0.4px;
+
+}
+
+.guest-summary-row strong {
+
+  font-size: 14px;
+
+  color: #1c150d;
+
+  text-align: right;
+
+}
+
+.initial-room-price {
+
+  display: flex;
+
+  justify-content: space-between;
+
+  align-items: center;
+
+  padding: 9px 11px;
+
+  background: #ffffff;
+
+  border: 1px solid #ebdccb;
+
+  border-radius: 9px;
+
+}
+
+.initial-room-price div {
+
+  display: flex;
+
+  flex-direction: column;
+
+  gap: 2px;
+
+}
+
+.initial-room-price span {
+
+  font-size: 13px;
+
+  font-weight: 900;
+
+  color: #7a6b5c;
+
+}
+
+.initial-room-price small {
+
+  font-size: 12px;
+
+  color: #a08f7e;
+
+}
+
+.initial-room-price strong {
+
+  font-size: 20px;
+
+  font-weight: 900;
+
+  color: #1c150d;
+
+}
+
+.initial-total-box {
+
+  background: #ffffff;
+
+  border: 1px solid #ebdccb;
+
+  border-radius: 9px;
+
+  padding: 10px 12px;
+
+  display: flex;
+
+  flex-direction: column;
+
+  gap: 6px;
+
+}
+
+.initial-total-box>div {
+
+  display: flex;
+
+  justify-content: space-between;
+
+  align-items: center;
+
+}
+
+.initial-total-box span {
+
+  font-size: 13px;
+
+  font-weight: 800;
+
+  color: #7a6b5c;
+
+}
+
+.initial-total-box strong {
+
+  font-size: 14px;
+
+  font-weight: 900;
+
+  color: #1c150d;
+
+}
+
+.initial-total-box .initial-total-final {
+
+  border-top: 1px solid #ebdccb;
+
+  padding-top: 8px;
+
+  margin-top: 2px;
+
+}
+
+.initial-total-final span {
+
+  font-size: 14px;
+
+  color: #1c150d;
+
+}
+
+.initial-total-final strong {
+
+  font-size: 22px;
+
+  color: #397044;
+
+}
+
+.initial-actions {
+
+  display: grid;
+
+  grid-template-columns: 1fr 1.4fr;
+
+  gap: 8px;
+
+  margin-top: 2px;
+
+}
+
+.btn-cancel-initial {
+
+  height: 42px;
+
+  width: 100%;
+
+  border: 1px solid #dc2626;
+
+  background: #ffffff;
+
+  color: #dc2626;
+
+  font-size: 15px;
+
+  font-weight: 900;
+
+  border-radius: 8px;
+
+  cursor: pointer;
+
+  transition:
+
+    background 0.15s ease,
+
+    color 0.15s ease,
+
+    transform 0.1s ease;
+
+}
+
+.btn-cancel-initial:hover:not(:disabled) {
+
+  background: #dc2626;
+
+  color: #ffffff;
+
+  transform: translateY(-1px);
+
+}
+
+.btn-cancel-initial:disabled {
+
+  opacity: 0.55;
+
+  cursor: not-allowed;
+
+}
+
+.order-subtotal-row {
+
+  display: flex;
+
+  justify-content: space-between;
+
+  align-items: center;
+
+  padding: 4px 0;
+
+}
+
+.subtotal-label {
+
+  font-size: 14px;
+
+  font-weight: 900;
+
+  letter-spacing: 0.4px;
+
+  color: #7a6b5c;
+
+}
+
+.subtotal-amount {
+
+  font-size: 20px;
+
+  font-weight: 900;
+
+  color: #1c150d;
+
+}
+
+.btn-outline-add {
+
+  height: 38px;
+
+  width: 100%;
+
+  background: #ffffff;
+
+  border: 1px dashed #cfbeaa;
+
+  border-radius: 8px;
+
+  font-size: 14px;
+
+  font-weight: 900;
+
+  color: #5c4c3e;
+
+  cursor: pointer;
+
+  transition: all 0.12s ease;
+
+}
+
+.btn-outline-add:hover {
+
+  background: #faf4e8;
+
+  border-color: #e08714;
+
+  color: #e08714;
+
+}
+
+.segmented-control {
+
+  display: grid;
+
+  grid-template-columns: 1fr 1fr;
+
+  gap: 3px;
+
+  background: #ffffff;
+
+  border: 1px solid #e0d2bf;
+
+  padding: 2px;
+
+  border-radius: 8px;
+
+  height: 40px;
+
+  box-sizing: border-box;
+
+}
+
+.seg-btn {
+
+  border: none;
+
+  background: transparent;
+
+  border-radius: 6px;
+
+  font-size: 14px;
+
+  font-weight: 800;
+
+  color: #7a6b5c;
+
+  cursor: pointer;
+
+  display: flex;
+
+  align-items: center;
+
+  justify-content: center;
+
+  transition: all 0.12s ease;
+
+}
+
+.seg-btn.active {
+
+  background-color: #e08714;
+
+  color: #ffffff;
+
+  font-weight: 900;
+
+}
+
+.payment-cash.active {
+
+  background: #397044;
+
+}
+
+.payment-PLIN.active {
+
+  background: #7042a5;
+
+}
+
+.btn-pay-all {
+
+  height: 42px;
+
+  width: 100%;
+
+  border: none;
+
+  background: #397044;
+
+  color: #ffffff;
+
+  font-size: 15px;
+
+  font-weight: 900;
+
+  border-radius: 8px;
+
+  cursor: pointer;
+
+  box-shadow: 0 2px 6px rgba(57, 112, 68, 0.3);
+
+  margin-top: 2px;
+
+  transition:
+
+    background 0.15s ease,
+
+    transform 0.1s ease;
+
+}
+
+.btn-pay-all:hover:not(:disabled) {
+
+  background: #2f6039;
+
+  transform: translateY(-1px);
+
+}
+
+.btn-pay-all:disabled {
+
+  background: #b9c7bb;
+
+  cursor: not-allowed;
+
+  box-shadow: none;
+
+}
+
+.btn-registrar-consumo {
+
+  height: 42px;
+
+  width: 100%;
+
+  border: none;
+
+  background: #e08714;
+
+  color: #ffffff;
+
+  font-size: 15px;
+
+  font-weight: 900;
+
+  border-radius: 8px;
+
+  cursor: pointer;
+
+  box-shadow: 0 2px 6px rgba(224, 135, 20, 0.3);
+
+  margin-top: 2px;
+
+  transition:
+
+    background 0.15s ease,
+
+    transform 0.1s ease;
+
+}
+
+.btn-registrar-consumo:hover:not(:disabled) {
+
+  background: #cc780c;
+
+  transform: translateY(-1px);
+
+}
+
+.btn-registrar-consumo:disabled {
+
+  background: #d4c5b3;
+
+  cursor: not-allowed;
+
+  box-shadow: none;
+
+}
+
+.modal-overlay {
+
+  position: fixed;
+
+  inset: 0;
+
+  background: rgba(43, 34, 26, 0.6);
+
+  backdrop-filter: blur(4px);
+
+  z-index: 9999;
+
+  display: flex;
+
+  align-items: center;
+
+  justify-content: center;
+
+  padding: 20px;
+
+}
+
+.modal-card {
+
+  background: #ffffff;
+
+  border-radius: 12px;
+
+  box-shadow: 0 15px 40px rgba(0, 0, 0, 0.2);
+
+  width: 100%;
+
+  max-width: 420px;
+
+  padding: 20px;
+
+  max-height: 80vh;
+
+  display: flex;
+
+  flex-direction: column;
+
+}
+
+.modal-header {
+
+  display: flex;
+
+  justify-content: space-between;
+
+  align-items: center;
+
+  margin-bottom: 12px;
+
+}
+
+.modal-header h2 {
+
+  margin: 0;
+
+  font-size: 18px;
+
+  font-weight: 900;
+
+  color: #1c150d;
+
+}
+
+.btn-modal-close {
+
+  background: transparent;
+
+  border: none;
+
+  font-size: 22px;
+
+  color: #8c7d6e;
+
+  cursor: pointer;
+
+}
+
+.modal-products-list {
+
+  overflow-y: auto;
+
+  display: flex;
+
+  flex-direction: column;
+
+  gap: 6px;
+
+}
+
+.prod-picker-item {
+
+  display: flex;
+
+  justify-content: space-between;
+
+  align-items: center;
+
+  padding: 10px 12px;
+
+  background: #faf6ee;
+
+  border-radius: 8px;
+
+  cursor: pointer;
+
+  font-size: 14px;
+
+  transition: background 0.1s ease;
+
+}
+
+.prod-picker-item:hover {
+
+  background: #f1ece1;
+
+}
+
+.prod-picker-name {
+
+  font-weight: 800;
+
+  color: #1c150d;
+
+}
+
+.prod-picker-price {
+
+  font-size: 15px;
+
+  font-weight: 900;
+
+  color: #e08714;
+
+}
+
+
+/* =========================================================
+   RESPONSIVE — TABLET GRANDE
+   ========================================================= */
+
+@media (max-width: 1100px) {
+
+  .two-columns-grid {
+
+    grid-template-columns: minmax(0, 1.45fr) minmax(300px, 0.9fr);
+
+    gap: 16px;
+
+  }
+
+  .products-table th {
+
+    padding: 10px 12px;
+
+  }
+
+  .products-table td {
+
+    padding: 10px 12px;
+
+  }
+
+  .consumption-order-card {
+
+    max-width: none;
+
+  }
+
+}
+
+
+/* =========================================================
+   RESPONSIVE — TABLET
+   ========================================================= */
+
+@media (max-width: 950px) {
+
+  .two-columns-grid {
+
+    grid-template-columns: 1fr;
+
+    gap: 16px;
+
+  }
+
+  .consumption-order-card {
+
+    max-width: none;
+
+    width: 100%;
+
+    justify-self: stretch;
+
+  }
+
+  .products-table-wrap {
+
+    overflow: hidden;
+
+  }
+
+  .products-table {
+
+    width: 100%;
+
+    min-width: 0;
+
+  }
+
+}
+
+
+/* =========================================================
+   RESPONSIVE — TABLET PEQUEÑA
+   ========================================================= */
+
+@media (max-width: 700px) {
+
+  .consumptions-page-layout {
+
+    gap: 14px;
+
+  }
+
+  .two-columns-grid {
+
+    gap: 14px;
+
+  }
+
+  .section-title {
+
+    margin-bottom: 10px;
+
+  }
+
+  .products-table th {
+
+    padding: 9px 10px;
+
+  }
+
+  .products-table td {
+
+    padding: 9px 10px;
+
+  }
+
+  .prod-name {
+
+    font-size: 15px;
+
+  }
+
+  .prod-category {
+
+    font-size: 13px;
+
+  }
+
+  .prod-price {
+
+    font-size: 16px;
+
+  }
+
+  .consumption-order-card {
+
+    padding: 14px;
+
+  }
+
+  .order-table th {
+
+    padding: 7px 6px;
+
+  }
+
+  .order-table td {
+
+    padding: 7px 6px;
+
+  }
+
+}
+
+
+/* =========================================================
+   RESPONSIVE — CELULAR
+   ========================================================= */
+
+@media (max-width: 560px) {
+
+  .consumptions-page-layout {
+
+    gap: 12px;
+
+  }
+
+  .two-columns-grid {
+
+    gap: 12px;
+
+  }
+
+  .section-title {
+
+    margin-bottom: 9px;
+
+  }
+
+
+  /* -------------------------------------------------------
+     PRODUCTOS
+     Cada producto se convierte en un bloque tocable.
+     No hay scroll horizontal.
+     ------------------------------------------------------- */
+
+  .products-table-wrap {
+
+    background: transparent;
+
+    border: none;
+
+    border-radius: 0;
+
+    box-shadow: none;
+
+    overflow: visible;
+
+  }
+
+  .products-table {
+
+    display: block;
+
+    width: 100%;
+
+    min-width: 0;
+
+  }
+
+  .products-table thead {
+
+    display: none;
+
+  }
+
+  .products-table tbody {
+
+    display: flex;
+
+    flex-direction: column;
+
+    gap: 7px;
+
+    width: 100%;
+
+  }
+
+  .products-table tbody tr.product-clickable-row {
+
+    display: grid;
+
+    grid-template-columns: minmax(0, 1fr) auto;
+
+    grid-template-areas:
+
+      "name price"
+
+      "category stock";
+
+    gap: 4px 10px;
+
+    width: 100%;
+
+    min-height: 60px;
+
+    box-sizing: border-box;
+
+    margin: 0;
+
+    padding: 9px 11px;
+
+    background: #ffffff;
+
+    border: 1px solid #ebdccb;
+
+    border-radius: 9px;
+
+  }
+
+  .products-table tbody tr.product-clickable-row:hover {
+
+    background: #ffffff;
+
+  }
+
+  .products-table tbody tr.product-clickable-row td {
+
+    display: block;
+
+    min-width: 0;
+
+    padding: 0;
+
+    border: none;
+
+  }
+
+  .products-table tbody tr.product-clickable-row td:nth-child(1) {
+
+    grid-area: name;
+
+    align-self: center;
+
+  }
+
+  .products-table tbody tr.product-clickable-row td:nth-child(2) {
+
+    grid-area: category;
+
+    align-self: center;
+
+  }
+
+  .products-table tbody tr.product-clickable-row td:nth-child(3) {
+
+    grid-area: price;
+
+    align-self: center;
+
+    text-align: right;
+
+  }
+
+  .products-table tbody tr.product-clickable-row td:nth-child(4) {
+
+    grid-area: stock;
+
+    align-self: center;
+
+    text-align: right;
+
+  }
+
+  .products-table tbody tr:not(.product-clickable-row) {
+
+    display: block;
+
+  }
+
+  .products-table tbody tr:not(.product-clickable-row) td {
+
+    display: block;
+
+    width: 100%;
+
+    box-sizing: border-box;
+
+  }
+
+  .prod-name {
+
+    display: block;
+
+    max-width: 100%;
+
+    overflow: hidden;
+
+    text-overflow: ellipsis;
+
+    white-space: nowrap;
+
+  }
+
+
+  /* -------------------------------------------------------
+     TARJETA DE CONSUMO
+     ------------------------------------------------------- */
+
+  .consumption-order-card {
+
+    width: 100%;
+
+    max-width: none;
+
+    padding: 13px;
+
+    box-sizing: border-box;
+
+  }
+
+  .order-form-body {
+
+    gap: 9px;
+
+  }
+
+  .group-label {
+
+    margin-bottom: 4px;
+
+  }
+
+  .custom-select-box select {
+
+    width: 100%;
+
+  }
+
+
+  /* -------------------------------------------------------
+     TABLA DE CONSUMOS ACTUALES
+     ------------------------------------------------------- */
+
+  .order-table-wrap {
+
+    width: 100%;
+
+    overflow: hidden;
+
+  }
+
+  .order-table {
+
+    width: 100%;
+
+    table-layout: fixed;
+
+  }
+
+  .order-table th,
+
+  .order-table td {
+
+    padding-left: 5px;
+
+    padding-right: 5px;
+
+  }
+
+  .order-table th:nth-child(1),
+
+  .order-table td:nth-child(1) {
+
+    width: 40%;
+
+  }
+
+  .order-table th:nth-child(2),
+
+  .order-table td:nth-child(2) {
+
+    width: 25%;
+
+  }
+
+  .order-table th:nth-child(3),
+
+  .order-table td:nth-child(3) {
+
+    width: 18%;
+
+  }
+
+  .order-table th:nth-child(4),
+
+  .order-table td:nth-child(4) {
+
+    width: 17%;
+
+  }
+
+  .order-table th:nth-child(5),
+
+  .order-table td:nth-child(5) {
+
+    width: auto;
+
+  }
+
+  .order-prod-name {
+
+    display: block;
+
+    max-width: 100%;
+
+    overflow: hidden;
+
+    text-overflow: ellipsis;
+
+    white-space: nowrap;
+
+  }
+
+  .order-price {
+
+    white-space: nowrap;
+
+  }
+
+  .order-line-sub {
+
+    white-space: nowrap;
+
+  }
+
+
+  /* -------------------------------------------------------
+     RESUMEN
+     ------------------------------------------------------- */
+
+  .guest-summary-row {
+
+    gap: 8px;
+
+    padding: 7px 9px;
+
+  }
+
+  .guest-summary-row span {
+
+    flex: 0 0 auto;
+
+  }
+
+  .guest-summary-row strong {
+
+    min-width: 0;
+
+    overflow: hidden;
+
+    text-overflow: ellipsis;
+
+    white-space: nowrap;
+
+  }
+
+  .initial-room-price {
+
+    gap: 10px;
+
+    padding: 9px;
+
+  }
+
+  .initial-room-price div {
+
+    min-width: 0;
+
+  }
+
+  .initial-room-price span,
+
+  .initial-room-price small {
+
+    white-space: normal;
+
+  }
+
+  .initial-room-price strong {
+
+    flex: 0 0 auto;
+
+  }
+
+  .initial-total-box {
+
+    padding: 9px 10px;
+
+  }
+
+  .initial-total-box>div {
+
+    gap: 8px;
+
+  }
+
+  .initial-total-box span {
+
+    min-width: 0;
+
+  }
+
+  .initial-total-box strong {
+
+    flex: 0 0 auto;
+
+    text-align: right;
+
+    max-width: 65%;
+
+    overflow: hidden;
+
+    text-overflow: ellipsis;
+
+    white-space: nowrap;
+
+  }
+
+
+  /* -------------------------------------------------------
+     BOTONES
+     ------------------------------------------------------- */
+
+  .initial-actions {
+
+    grid-template-columns: 1fr 1.4fr;
+
+    gap: 6px;
+
+  }
+
+  .btn-cancel-initial,
+
+  .btn-pay-all,
+
+  .btn-registrar-consumo {
+
+    width: 100%;
+
+  }
+
+  .segmented-control {
+
+    width: 100%;
+
+  }
+
+
+  /* -------------------------------------------------------
+     MODAL
+     ------------------------------------------------------- */
+
+  .modal-overlay {
+
+    padding: 12px;
+
+  }
+
+  .modal-card {
+
+    width: 100%;
+
+    max-width: none;
+
+    max-height: 85vh;
+
+    padding: 15px;
+
+  }
+
+}
+
+
+/* =========================================================
+   RESPONSIVE — CELULAR PEQUEÑO
+   ========================================================= */
+
+@media (max-width: 380px) {
+
+  .consumptions-page-layout {
+
+    gap: 10px;
+
+  }
+
+  .two-columns-grid {
+
+    gap: 10px;
+
+  }
+
+  .consumption-order-card {
+
+    padding: 11px;
+
+  }
+
+  .products-table tbody {
+
+    gap: 6px;
+
+  }
+
+  .products-table tbody tr.product-clickable-row {
+
+    min-height: 56px;
+
+    padding: 8px 9px;
+
+    gap: 3px 8px;
+
+  }
+
+  .prod-name {
+
+    font-size: 14px;
+
+  }
+
+  .prod-category {
+
+    font-size: 12px;
+
+  }
+
+  .prod-price {
+
+    font-size: 15px;
+
+  }
+
+  .prod-stock-badge {
+
+    font-size: 12px;
+
+    padding: 3px 7px;
+
+  }
+
+  .order-table th,
+
+  .order-table td {
+
+    padding-left: 3px;
+
+    padding-right: 3px;
+
+  }
+
+  .order-table th {
+
+    font-size: 11px;
+
+  }
+
+  .order-table td {
+
+    font-size: 12px;
+
+  }
+
+  .quantity-control {
+
+    gap: 2px;
+
+    padding: 2px;
+
+  }
+
+  .quantity-btn {
+
+    width: 23px;
+
+    height: 23px;
+
+    font-size: 16px;
+
+  }
+
+  .order-qty {
+
+    min-width: 19px;
+
+    font-size: 12px;
+
+  }
+
+  .initial-actions {
+
+    gap: 5px;
+
+  }
+
+  .btn-cancel-initial,
+
+  .btn-pay-all,
+
+  .btn-registrar-consumo {
+
+    font-size: 13px;
+
+  }
+
+}

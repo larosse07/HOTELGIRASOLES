@@ -1,0 +1,662 @@
+<div class="rooms-page">
+
+  <section class="quick-reception">
+
+
+    <div class="quick-reception__header">
+
+      <div>
+        <span class="section-kicker">
+          RECEPCIÓN
+        </span>
+
+        <h2>
+          Registro rápido
+        </h2>
+      </div>
+
+      <div class="quick-reception__header-actions">
+
+        <span class="reception-status">
+          {{ estimatedCheckOutLabel }}
+        </span>
+
+        <button type="button" class="clear-form-button" [disabled]="loading" (click)="clearForm()">
+
+          LIMPIAR DATOS
+
+        </button>
+
+      </div>
+
+    </div>
+
+
+    <div class="quick-reception__form">
+
+      <div class="field">
+
+        <label for="dniInput">
+          DNI
+        </label>
+
+        <input id="dniInput" type="text" [(ngModel)]="dni" placeholder="Ingrese DNI" autocomplete="off" />
+
+      </div>
+
+
+      <div class="field">
+
+        <label for="guestNameInput">
+          NOMBRE DEL HUÉSPED
+        </label>
+
+        <input id="guestNameInput" type="text" [(ngModel)]="guestName" placeholder="Nombre completo"
+          autocomplete="off" />
+
+      </div>
+
+
+      <div class="field">
+
+        <label for="hoursInput">
+          HORAS
+        </label>
+
+        <select id="hoursInput" [(ngModel)]="hours" (ngModelChange)="onHoursChange()">
+
+          <option [ngValue]="4">
+            4 horas
+          </option>
+
+          <option [ngValue]="24">
+            Toda la noche
+          </option>
+
+        </select>
+
+        <small class="field-hint">
+          Seleccione la duración de la estadía
+        </small>
+
+      </div>
+
+
+      <div class="field room-field">
+
+        <label for="roomSelect">
+          HABITACIÓN
+        </label>
+
+        <select id="roomSelect" [(ngModel)]="selectedRoomId">
+
+          <option [ngValue]="null">
+            Seleccione una habitación
+          </option>
+
+          <option *ngFor="let room of availableRooms" [ngValue]="room.id">
+
+            Hab. {{ room.roomNumber }}
+            · {{ room.type }}
+            · S/ {{ calculatedRoomPrice(room) | number:'1.2-2' }}
+
+          </option>
+
+        </select>
+
+      </div>
+
+
+      <div class="field payment-field">
+
+        <label>
+          PAGO
+        </label>
+
+        <button type="button" class="payment-selector" [class.payment-efectivo]="paymentMethod === 'EFECTIVO'"
+          [class.payment-PLIN]="paymentMethod === 'PLIN'" (click)="togglePayment()">
+
+          <span>
+
+            <strong>
+              {{
+              paymentMethod === 'EFECTIVO'
+              ? 'Efectivo'
+              : 'PLIN'
+              }}
+            </strong>
+
+            <small>
+              {{
+              paymentMethod === 'EFECTIVO'
+              ? 'Pago en efectivo'
+              : 'Pago digital'
+              }}
+            </small>
+
+          </span>
+
+          <span class="payment-arrow">
+            {{ paymentOpen ? '▲' : '▼' }}
+          </span>
+
+        </button>
+
+
+        <div *ngIf="paymentOpen" class="payment-menu">
+
+          <button type="button" class="payment-option payment-option-efectivo"
+            [class.active]="paymentMethod === 'EFECTIVO'" (click)="selectPayment('EFECTIVO')">
+
+            <span>
+
+              <strong>
+                Efectivo
+              </strong>
+
+              <small>
+                Pago en efectivo
+              </small>
+
+            </span>
+
+          </button>
+
+
+          <button type="button" class="payment-option payment-option-PLIN" [class.active]="paymentMethod === 'PLIN'"
+            (click)="selectPayment('PLIN')">
+
+            <span>
+
+              <strong>
+                PLIN
+              </strong>
+
+              <small>
+                Pago digital
+              </small>
+
+            </span>
+
+          </button>
+
+        </div>
+
+      </div>
+
+
+      <div class="quick-reception__actions">
+
+        <button type="button" class="add-product-button" [disabled]="loading || !canReserve()"
+          (click)="addInitialProduct()">
+
+          AÑADIR PRODUCTO
+
+        </button>
+
+
+        <button type="button" class="reserve-button" [disabled]="loading || !canReserve()" (click)="reserve()">
+
+          <span *ngIf="!loading">
+            CREAR RESERVA
+          </span>
+
+          <span *ngIf="loading">
+            GUARDANDO...
+          </span>
+
+        </button>
+
+      </div>
+
+    </div>
+
+
+    <div *ngIf="error" class="error-message">
+
+      {{ error }}
+
+    </div>
+
+
+    <div *ngIf="success" class="success-message">
+
+      {{ success }}
+
+    </div>
+
+
+  </section>
+
+  <section class="rooms-toolbar">
+
+
+    <div class="rooms-toolbar__title">
+
+      <span class="section-kicker">
+        HABITACIONES
+      </span>
+
+      <h1>
+        Habitaciones
+      </h1>
+
+    </div>
+
+
+    <div class="room-filters">
+
+      <button type="button" [class.active]="filter === 'TODAS'" (click)="setFilter('TODAS')">
+
+        TODAS
+
+      </button>
+
+
+      <button type="button" [class.active]="filter === 'DISPONIBLE'" (click)="setFilter('DISPONIBLE')">
+
+        DISPONIBLES
+
+      </button>
+
+
+      <button type="button" [class.active]="filter === 'OCUPADA'" (click)="setFilter('OCUPADA')">
+
+        OCUPADAS
+
+      </button>
+
+
+      <button type="button" [class.active]="filter === 'PENDIENTE'" (click)="setFilter('PENDIENTE')">
+
+        PENDIENTES
+
+      </button>
+
+
+      <button type="button" [class.active]="filter === 'LIMPIEZA'" (click)="setFilter('LIMPIEZA')">
+
+        LIMPIEZA
+
+      </button>
+
+
+      <button type="button" [class.active]="filter === 'PERSONAL'" (click)="setFilter('PERSONAL')">
+
+        PERSONAL
+
+      </button>
+
+    </div>
+
+
+  </section>
+
+  <section class="rooms-grid">
+
+
+    <article *ngFor="let room of filteredRooms" class="room-card" [class.room-card--available]="
+    getRoomDisplayStatus(room) === 'DISPONIBLE'
+  " [class.room-card--occupied]="
+    getRoomDisplayStatus(room) === 'OCUPADA'
+  " [class.room-card--cleaning]="
+    getRoomDisplayStatus(room) === 'LIMPIEZA'
+  " [class.room-card--pending]="
+    getRoomDisplayStatus(room) === 'PENDIENTE'
+  " [class.room-card--personal]="
+    getRoomDisplayStatus(room) === 'PERSONAL'
+  ">
+
+
+      <div class="room-card__header">
+
+        <div>
+
+          <span class="room-card__label">
+            HABITACIÓN
+          </span>
+
+          <h2>
+            {{ room.roomNumber }}
+          </h2>
+
+        </div>
+
+
+        <span class="room-status" [class.room-status--available]="
+        getRoomDisplayStatus(room) === 'DISPONIBLE'
+      " [class.room-status--occupied]="
+        getRoomDisplayStatus(room) === 'OCUPADA'
+      " [class.room-status--pending]="
+        getRoomDisplayStatus(room) === 'PENDIENTE'
+      " [class.room-status--cleaning]="
+        getRoomDisplayStatus(room) === 'LIMPIEZA'
+      ">
+
+          {{ getRoomDisplayStatus(room) }}
+
+        </span>
+
+      </div>
+
+
+
+      <div class="room-card__info">
+
+        <span class="room-type">
+
+          {{
+          room.roomNumber === '203'
+          ? 'Dos camas'
+
+          : room.roomNumber === '206' ||
+          room.roomNumber === '306'
+          ? 'Jacuzzi'
+
+          : room.roomNumber === '201A'
+          ? 'Cama trabajadores'
+
+          : room.roomNumber === '301A'
+          ? 'Almacén'
+
+          : 'Cama matrimonial'
+          }}
+
+        </span>
+
+
+        <ng-container *ngIf="isInternalRoom(room)">
+
+          <strong class="room-price">
+            —
+          </strong>
+
+          <span class="room-night-price">
+
+            {{
+            room.roomNumber === '201A'
+            ? 'Cama trabajadores'
+            : 'Sábanas y toallas'
+            }}
+
+          </span>
+
+        </ng-container>
+
+
+        <ng-container *ngIf="
+        !isInternalRoom(room) &&
+        getRoomDisplayStatus(room) === 'DISPONIBLE'
+      ">
+
+          <strong class="room-price">
+
+            S/
+            {{ room.price | number:'1.2-2' }}
+
+          </strong>
+
+
+          <span class="room-night-price">
+
+            Toda la noche
+            S/
+            {{ room.nightPrice | number:'1.2-2' }}
+
+          </span>
+
+        </ng-container>
+
+
+        <ng-container *ngIf="
+        !isInternalRoom(room) &&
+        getRoomDisplayStatus(room) !== 'DISPONIBLE'
+      ">
+
+          <strong class="room-price">
+
+            {{
+            getRoomDisplayPrice(room)
+            | currency:'PEN':'symbol':'1.2-2'
+            }}
+
+          </strong>
+
+        </ng-container>
+
+      </div>
+
+
+
+      <ng-container *ngIf="
+      getRoomDisplayStatus(room) === 'DISPONIBLE' &&
+      !isInternalRoom(room)
+    ">
+
+        <div class="room-card__message">
+
+          <span>
+
+            {{
+            room.roomNumber === '203'
+            ? 'Dos camas'
+
+            : room.roomNumber === '206' ||
+            room.roomNumber === '306'
+            ? 'Jacuzzi'
+
+            : 'Cama matrimonial'
+            }}
+
+          </span>
+
+        </div>
+
+
+        <button type="button" class="room-card__action" (click)="quickSelectRoom(room)">
+
+          CREAR RESERVA
+
+        </button>
+
+      </ng-container>
+
+
+
+      <ng-container *ngIf="
+      getRoomDisplayStatus(room) === 'OCUPADA'
+    ">
+
+        <div class="room-card__details">
+
+          <div>
+
+            <span>
+              Huésped
+            </span>
+
+            <strong>
+
+              {{
+              getActiveReservation(room.id)?.guestName
+              || 'Sin información'
+              }}
+
+            </strong>
+
+          </div>
+
+
+          <div>
+
+            <span>
+              Ingreso
+            </span>
+
+            <strong>
+
+              {{
+              getActiveReservation(room.id)?.checkIn
+              | date:'h:mm a'
+              }}
+
+            </strong>
+
+          </div>
+
+
+          <div>
+
+            <span>
+              Salida estimada
+            </span>
+
+            <strong>
+
+              {{
+              getActiveReservation(room.id)?.estimatedCheckOut
+              | date:'h:mm a'
+              }}
+
+            </strong>
+
+          </div>
+
+        </div>
+
+
+        <button type="button" class="room-card__action room-card__action--cleaning"
+          (click)="changeStatus(room, 'LIMPIEZA')">
+
+          PASAR A LIMPIEZA
+
+        </button>
+
+      </ng-container>
+
+
+
+      <ng-container *ngIf="
+      getRoomDisplayStatus(room) === 'PENDIENTE'
+    ">
+
+        <div class="room-card__details">
+
+          <div>
+
+            <span>
+              Huésped
+            </span>
+
+            <strong>
+
+              {{
+              getActiveReservation(room.id)?.guestName
+              || 'Sin información'
+              }}
+
+            </strong>
+
+          </div>
+
+        </div>
+
+
+        <div class="pending-actions">
+
+          <button type="button" class="room-card__action room-card__action--voucher" (click)="viewPendingVoucher(room)">
+
+            VER VOUCHER
+
+          </button>
+
+        </div>
+
+      </ng-container>
+
+
+
+      <ng-container *ngIf="
+      getRoomDisplayStatus(room) === 'LIMPIEZA' &&
+      !isInternalRoom(room)
+    ">
+
+        <div class="room-card__message room-card__message--cleaning">
+
+          <span>
+            En limpieza
+          </span>
+
+          <small>
+            Habitación pendiente de habilitación
+          </small>
+
+        </div>
+
+
+        <button type="button" class="room-card__action room-card__action--available"
+          (click)="changeStatus(room, 'DISPONIBLE')">
+
+          MARCAR DISPONIBLE
+
+        </button>
+
+      </ng-container>
+
+
+
+      <ng-container *ngIf="
+      getRoomDisplayStatus(room) === 'PERSONAL' &&
+      room.roomNumber === '201A'
+    ">
+
+        <div class="room-card__message room-card__message--personal">
+
+          <span>
+            Cama trabajadores
+          </span>
+
+        </div>
+
+      </ng-container>
+
+
+
+      <ng-container *ngIf="
+      getRoomDisplayStatus(room) === 'PERSONAL' &&
+      room.roomNumber === '301A'
+    ">
+
+        <div class="room-card__message room-card__message--personal">
+
+          <span>
+            Sábanas y toallas
+          </span>
+
+        </div>
+
+      </ng-container>
+
+    </article>
+
+
+
+    <div *ngIf="filteredRooms.length === 0" class="empty-state">
+
+      <strong>
+        No hay habitaciones
+      </strong>
+
+      <span>
+        No existen habitaciones para este filtro.
+      </span>
+
+    </div>
+
+
+  </section>
+
+  <app-voucher-modal *ngIf="showVoucherModal && activeVoucher" [visible]="true" [voucher]="activeVoucher"
+    (closed)="showVoucherModal = false" (payRequested)="payPendingFromVoucher($event)"> </app-voucher-modal>
+
+</div>

@@ -1,0 +1,1875 @@
+<section class="cash-page">
+
+  <!-- ===================================================== -->
+  <!-- HEADER -->
+  <!-- ===================================================== -->
+
+  <header class="cash-header">
+
+    <div class="cash-header__left">
+
+      <span class="section-kicker">
+        ADMINISTRACIÓN
+      </span>
+
+      <h1>
+        Arqueo de Caja
+      </h1>
+
+      <p>
+        {{ todayDateDisplay | titlecase }}
+        · Turno 08:00 – 20:00
+      </p>
+
+    </div>
+
+
+    <div class="cash-header__actions">
+
+      <button type="button" class="secondary-button" (click)="printCash()">
+        Imprimir cierre
+      </button>
+
+      @if (currentShift) {
+
+      <button type="button" class="primary-button" (click)="openHandoffModal()">
+        Cerrar caja
+      </button>
+
+      } @else {
+
+      <button type="button" class="primary-button" (click)="openOpenShiftModal()">
+        Iniciar caja
+      </button>
+
+      }
+
+    </div>
+
+  </header>
+
+
+  <!-- ===================================================== -->
+  <!-- MENSAJES -->
+  <!-- ===================================================== -->
+
+  @if (errorMessage) {
+
+  <div class="cash-message cash-message--error">
+    {{ errorMessage }}
+  </div>
+
+  }
+
+  @if (successMessage) {
+
+  <div class="cash-message cash-message--success">
+    {{ successMessage }}
+  </div>
+
+  }
+
+
+  <!-- ===================================================== -->
+  <!-- FECHA -->
+  <!-- ===================================================== -->
+
+  <section class="date-toolbar">
+
+    <div class="date-toolbar__left">
+
+      <button type="button" class="date-button" [class.active]="timeFilter === 'HOY'" (click)="setToday()">
+        Hoy
+      </button>
+
+      <button type="button" class="date-button" [class.active]="timeFilter === 'AYER'" (click)="setYesterday()">
+        Ayer
+      </button>
+
+      <button type="button" class="date-button" [class.active]="timeFilter === 'ESTE_MES'" (click)="setCurrentMonth()">
+        Este mes
+      </button>
+
+    </div>
+
+
+    <div class="date-toolbar__right">
+
+      <label class="date-picker">
+
+        <span>
+          FECHA
+        </span>
+
+        <input type="date" [(ngModel)]="selectedDate" (change)="onDateChange()" />
+
+      </label>
+
+    </div>
+
+  </section>
+
+
+  <!-- ===================================================== -->
+  <!-- ESTADO DE CAJA -->
+  <!-- ===================================================== -->
+
+  <section class="shift-status-card">
+
+    <div class="shift-status-card__main">
+
+      <span class="section-kicker">
+        ESTADO DE CAJA
+      </span>
+
+      @if (currentShift) {
+
+      <div class="shift-status-card__title-row">
+
+        <h2>
+          Caja abierta
+        </h2>
+
+        <span class="status-badge status-badge--open">
+          EN CURSO
+        </span>
+
+      </div>
+
+      <p>
+        Responsable:
+        <strong>
+          {{ currentShift.personName }}
+        </strong>
+      </p>
+
+      } @else {
+
+      <div class="shift-status-card__title-row">
+
+        <h2>
+          Caja cerrada
+        </h2>
+
+        <span class="status-badge status-badge--closed">
+          CERRADA
+        </span>
+
+      </div>
+
+      <p>
+        No hay un turno abierto actualmente.
+      </p>
+
+      }
+
+    </div>
+
+
+    <div class="shift-status-card__numbers">
+
+      <div class="shift-number">
+
+        <span>
+          CAJA INICIAL
+        </span>
+
+        <strong>
+          S/ {{ formatMoney(initialBalance) }}
+        </strong>
+
+      </div>
+
+
+      <div class="shift-number">
+
+        <span>
+          EFECTIVO ESPERADO
+        </span>
+
+        <strong>
+          S/ {{ formatMoney(expectedCash) }}
+        </strong>
+
+      </div>
+
+
+      @if (currentShift) {
+
+      <div class="shift-number">
+
+        <span>
+          RESPONSABLE
+        </span>
+
+        <strong>
+          {{ currentShift.personName }}
+        </strong>
+
+      </div>
+
+      }
+
+    </div>
+
+  </section>
+
+
+  <!-- ===================================================== -->
+  <!-- RESUMEN -->
+  <!-- ===================================================== -->
+
+  <section class="summary-section">
+
+
+    <div class="summary-card summary-card--income">
+
+      <span class="summary-card__label">
+        INGRESOS
+      </span>
+
+      <strong class="summary-card__amount">
+        S/ {{ formatMoney(totalGeneral) }}
+      </strong>
+
+      <span class="summary-card__detail">
+        {{ movements.length }} movimiento(s)
+      </span>
+
+    </div>
+
+
+    <div class="summary-card summary-card--expense">
+
+      <span class="summary-card__label">
+        EGRESOS
+      </span>
+
+      <strong class="summary-card__amount">
+        S/ {{ formatMoney(totalExpenses) }}
+      </strong>
+
+      <span class="summary-card__detail">
+        {{ cashExpenseCount }} movimiento(s)
+      </span>
+
+    </div>
+
+
+    <div class="summary-card summary-card--net">
+
+      <span class="summary-card__label">
+        SALDO NETO
+      </span>
+
+      <strong class="summary-card__amount">
+        S/ {{ formatMoney(totalGeneral - totalExpenses) }}
+      </strong>
+
+      <span class="summary-card__detail">
+        {{ totalMovementCount }} movimiento(s)
+      </span>
+
+    </div>
+
+
+  </section>
+
+
+  <!-- ===================================================== -->
+  <!-- MÉTODOS DE PAGO -->
+  <!-- ===================================================== -->
+
+  <section class="payment-summary">
+
+
+    <div class="payment-card">
+
+      <div class="payment-card__icon">
+        💵
+      </div>
+
+      <div class="payment-card__content">
+
+        <span>
+          Efectivo
+        </span>
+
+        <strong>
+          S/ {{ formatMoney(totalEfectivo) }}
+        </strong>
+
+        <small>
+          {{
+          totalGeneral > 0
+          ? ((totalEfectivo / totalGeneral) * 100 | number:'1.1-1')
+          : '0.0'
+          }}% de ingresos
+        </small>
+
+      </div>
+
+    </div>
+
+
+    <div class="payment-card">
+
+      <div class="payment-card__icon">
+        📲
+      </div>
+
+      <div class="payment-card__content">
+
+        <span>
+          PLIN
+        </span>
+
+        <strong>
+          S/ {{ formatMoney(totalPLIN) }}
+        </strong>
+
+        <small>
+          {{
+          totalGeneral > 0
+          ? ((totalPLIN / totalGeneral) * 100 | number:'1.1-1')
+          : '0.0'
+          }}% de ingresos
+        </small>
+
+      </div>
+
+    </div>
+
+
+  </section>
+
+
+  <!-- ===================================================== -->
+  <!-- CONTROL DE PERSONAL -->
+  <!-- ===================================================== -->
+
+  <section class="personal-summary">
+
+
+    <div class="personal-summary__header">
+
+      <div>
+
+        <span class="section-kicker">
+          CONTROL DE PERSONAL
+        </span>
+
+        <h2>
+          Consumo de personal
+        </h2>
+
+      </div>
+
+      <span class="personal-summary__total">
+        S/ {{ formatMoney(totalPersonalExpenses) }}
+      </span>
+
+    </div>
+
+
+    <div class="personal-summary__grid">
+
+
+      <!-- CAJA DEL HOTEL -->
+
+      <div class="personal-mini-card">
+
+        <span>
+          PAGADO POR CAJA
+        </span>
+
+        <strong>
+          S/ {{ formatMoney(totalPersonalHotelExpenses) }}
+        </strong>
+
+        <small>
+          Sí afecta Caja · sale dinero
+        </small>
+
+      </div>
+
+
+      <!-- DINERO PROPIO -->
+
+      <div class="personal-mini-card">
+
+        <span>
+          DINERO PROPIO
+        </span>
+
+        <strong>
+          S/ {{ formatMoney(totalPersonalWorkerExpenses) }}
+        </strong>
+
+        <small>
+          Sí afecta Caja · entra dinero
+        </small>
+
+      </div>
+
+
+      <!-- A CUENTA -->
+
+      <div class="personal-mini-card">
+
+        <span>
+          A CUENTA
+        </span>
+
+        <strong>
+          S/ {{ formatMoney(totalPersonalAccountExpenses) }}
+        </strong>
+
+        <small>
+          No afecta Caja
+        </small>
+
+      </div>
+
+
+      <!-- STOCK -->
+
+      <div class="personal-mini-card">
+
+        <span>
+          STOCK UTILIZADO
+        </span>
+
+        <strong>
+          {{ personalStockUnits }}
+        </strong>
+
+        <small>
+          unidad(es)
+        </small>
+
+      </div>
+
+
+    </div>
+
+
+  </section>
+
+
+  <!-- ===================================================== -->
+  <!-- MOVIMIENTOS -->
+  <!-- ===================================================== -->
+
+  <section class="movements-section">
+
+
+    <div class="section-heading">
+
+      <div>
+
+        <span class="section-kicker">
+          CAJA
+        </span>
+
+        <h2>
+          Movimientos del turno
+        </h2>
+
+        <p>
+          Revisa ingresos, egresos y consumos de personal.
+        </p>
+
+      </div>
+      @if (isAdmin) {
+      <button type="button" class="secondary-button" (click)="openExpenseModal()">
+        + Registrar egreso
+      </button>
+      }
+    </div>
+
+
+    <div class="movement-filters">
+
+
+      <button type="button" class="filter-button" [class.active]="movementFilter === 'TODOS'"
+        (click)="setMovementFilter('TODOS')">
+        Todos
+      </button>
+
+
+      <button type="button" class="filter-button" [class.active]="movementFilter === 'EFECTIVO'"
+        (click)="setMovementFilter('EFECTIVO')">
+        💵 Efectivo
+      </button>
+
+
+      <button type="button" class="filter-button" [class.active]="movementFilter === 'PLIN'"
+        (click)="setMovementFilter('PLIN')">
+        📲 PLIN
+      </button>
+
+
+      <button type="button" class="filter-button" [class.active]="movementFilter === 'CONSUMO_PERSONAL'"
+        (click)="setMovementFilter('CONSUMO_PERSONAL')">
+        📦 Consumo de personal
+      </button>
+
+
+      <button type="button" class="filter-button" [class.active]="movementFilter === 'INGRESO'"
+        (click)="setMovementFilter('INGRESO')">
+        Ingreso
+      </button>
+
+
+      <button type="button" class="filter-button" [class.active]="movementFilter === 'EGRESO'"
+        (click)="setMovementFilter('EGRESO')">
+        Egreso
+      </button>
+
+
+    </div>
+
+
+    <!-- ===================================================== -->
+    <!-- TABLA -->
+    <!-- ===================================================== -->
+
+    <div class="movement-table-wrap">
+
+      @if (loading) {
+
+      <div class="empty-state">
+        Cargando movimientos...
+      </div>
+
+      } @else if (filteredRows.length === 0) {
+
+      <div class="empty-state">
+
+        <strong>
+          No hay movimientos
+        </strong>
+
+        <span>
+          No existen movimientos registrados para este periodo.
+        </span>
+
+      </div>
+
+      } @else {
+
+      <table class="movement-table">
+
+        <thead>
+
+          <tr>
+
+            <th>
+              HORA
+            </th>
+
+            <th>
+              DESCRIPCIÓN
+            </th>
+
+            <th>
+              HAB.
+            </th>
+
+            <th>
+              MÉTODO
+            </th>
+
+            <th>
+              TIPO
+            </th>
+
+            <th>
+              MONTO
+            </th>
+
+            <th>
+            </th>
+
+          </tr>
+
+        </thead>
+
+
+        <tbody>
+
+          @for (
+          row of filteredRows;
+          track row.id
+          ) {
+
+          <tr [class.clickable-row]="row.clickable" (click)="openOperation(row)">
+
+
+            <!-- HORA -->
+
+            <td class="movement-time">
+
+              {{ formatTime(row.createdAt) }}
+
+            </td>
+
+
+            <!-- DESCRIPCIÓN -->
+
+            <td class="movement-description">
+
+              <strong>
+                {{ row.description }}
+              </strong>
+
+              <small>
+                {{ row.reference }}
+              </small>
+
+
+              @if (row.expense) {
+
+              @if (row.expense.productName) {
+
+              <small>
+
+                {{ row.expense.productName }}
+
+                @if (row.expense.quantity) {
+                · {{ row.expense.quantity }} un.
+                }
+
+              </small>
+
+              }
+
+              }
+
+            </td>
+
+
+            <!-- HABITACIÓN -->
+
+            <td>
+
+              @if (row.room !== '—') {
+
+              <span class="room-chip">
+                Hab. {{ row.room }}
+              </span>
+
+              } @else {
+
+              <span class="muted">
+                —
+              </span>
+
+              }
+
+            </td>
+
+
+            <!-- MÉTODO -->
+
+            <td>
+
+              @if (row.movement) {
+
+              <span class="method-badge">
+
+                @if (
+                row.movement.paymentMethod === 'EFECTIVO'
+                ) {
+
+                💵 Efectivo
+
+                } @else {
+
+                📲 PLIN
+
+                }
+
+              </span>
+
+
+              } @else if (row.expense) {
+
+
+              @if (
+              row.expense.cashEffect === 'INGRESO'
+              ) {
+
+              <span class="method-badge method-badge--personal">
+                Dinero propio
+              </span>
+
+
+              } @else if (
+              row.expense.personalStatus === 'A_CUENTA' ||
+              row.expense.cashEffect === 'NINGUNO'
+              ) {
+
+              <span class="method-badge method-badge--personal">
+                A cuenta
+              </span>
+
+
+              } @else {
+
+              <span class="method-badge method-badge--expense">
+                Caja del hotel
+              </span>
+
+              }
+
+
+              } @else {
+
+              <span class="muted">
+                —
+              </span>
+
+              }
+
+            </td>
+
+
+            <!-- TIPO -->
+
+            <td>
+
+              @if (
+              row.type === 'RESERVA' ||
+              row.type === 'CONSUMO'
+              ) {
+
+              <span class="type-badge type-badge--income">
+                ↑ Ingreso
+              </span>
+
+
+              } @else if (
+              row.type === 'EGRESO'
+              ) {
+
+              <span class="type-badge type-badge--expense">
+                ↓ Egreso
+              </span>
+
+
+              } @else if (
+              row.type === 'CONSUMO_PERSONAL'
+              ) {
+
+              <span class="type-badge type-badge--personal">
+                📦 Personal
+              </span>
+
+
+              } @else if (
+              row.type === 'APERTURA'
+              ) {
+
+              <span class="type-badge type-badge--opening">
+                Apertura
+              </span>
+
+
+              } @else if (
+              row.type === 'ENTREGA'
+              ) {
+
+              <span class="type-badge type-badge--closing">
+                Cierre
+              </span>
+
+              }
+
+            </td>
+
+
+            <!-- MONTO -->
+
+            <td class="movement-amount">
+
+
+              <!-- INGRESO EN EFECTIVO -->
+
+              @if (
+              row.cash > 0
+              ) {
+
+              <strong class="amount-positive">
+                + S/ {{ formatMoney(row.cash) }}
+              </strong>
+
+
+              <!-- EGRESO EN EFECTIVO -->
+
+              } @else if (
+              row.cash < 0 ) { <strong class="amount-negative">
+                − S/ {{ formatMoney(abs(row.cash)) }}
+                </strong>
+
+
+                <!-- INGRESO PLIN -->
+
+                } @else if (
+                row.PLIN > 0
+                ) {
+
+                <strong class="amount-positive">
+                  + S/ {{ formatMoney(row.PLIN) }}
+                </strong>
+
+
+                <!-- PERSONAL SIN MOVIMIENTO DE CAJA -->
+
+                } @else if (
+                row.type === 'CONSUMO_PERSONAL' &&
+                row.expense
+                ) {
+
+                @if (
+                row.expense.cashEffect === 'INGRESO'
+                ) {
+
+                <strong class="amount-positive">
+                  + S/ {{ formatMoney(row.expense.amount) }}
+                </strong>
+
+
+                } @else if (
+                row.expense.cashEffect === 'EGRESO'
+                ) {
+
+                <strong class="amount-negative">
+                  − S/ {{ formatMoney(row.expense.amount) }}
+                </strong>
+
+
+                } @else {
+
+                <strong class="amount-neutral">
+                  S/ 0.00
+                </strong>
+
+                }
+
+
+                } @else {
+
+                <span class="muted">
+                  —
+                </span>
+
+                }
+
+            </td>
+
+
+            <!-- ACCIÓN -->
+
+            <td class="movement-action">
+
+              @if (row.clickable) {
+
+              <span>
+                Ver ticket →
+              </span>
+
+              }
+
+            </td>
+
+
+          </tr>
+
+          }
+
+        </tbody>
+
+      </table>
+
+      }
+
+    </div>
+
+
+  </section>
+
+
+  <!-- ===================================================== -->
+  <!-- MODAL ABRIR CAJA -->
+  <!-- ===================================================== -->
+
+  @if (showOpenShiftModal) {
+
+  <div class="modal-backdrop" (click)="closeOpenShiftModal()">
+
+    <section class="modal-card" (click)="$event.stopPropagation()">
+
+      <div class="modal-header">
+
+        <div>
+
+          <span class="section-kicker">
+            CAJA
+          </span>
+
+          <h2>
+            Iniciar caja
+          </h2>
+
+          <p>
+            Abre el turno de 08:00 – 20:00.
+          </p>
+
+        </div>
+
+        <button type="button" class="modal-close" (click)="closeOpenShiftModal()">
+          ×
+        </button>
+
+      </div>
+
+
+      <div class="modal-body">
+
+        <div class="opening-info">
+
+          <span>
+            CAJA INICIAL
+          </span>
+
+          <strong>
+            S/ {{ formatMoney(openingAmount) }}
+          </strong>
+
+          <small>
+            Monto heredado del cierre anterior.
+          </small>
+
+        </div>
+
+
+        <div class="field">
+
+          <label for="openingPerson">
+            RESPONSABLE
+          </label>
+
+          <input id="openingPerson" type="text" [(ngModel)]="openingPersonName"
+            placeholder="Nombre de quien toma la caja" autocomplete="off" />
+
+        </div>
+
+
+        <div class="field">
+
+          <label for="openingAmount">
+            MONTO INICIAL
+          </label>
+
+          <div class="money-input">
+
+            <span>
+              S/
+            </span>
+
+            <input id="openingAmount" type="number" min="0" step="0.10" [(ngModel)]="openingAmount" />
+
+          </div>
+
+        </div>
+
+      </div>
+
+
+      <div class="modal-actions">
+
+        <button type="button" class="secondary-button" (click)="closeOpenShiftModal()">
+          Cancelar
+        </button>
+
+        <button type="button" class="primary-button" (click)="confirmOpenShift()">
+          Iniciar caja
+        </button>
+
+      </div>
+
+    </section>
+
+  </div>
+
+  }
+
+
+  <!-- ===================================================== -->
+  <!-- MODAL CERRAR CAJA -->
+  <!-- ===================================================== -->
+
+  @if (showHandoffModal) {
+
+  <div class="modal-backdrop" (click)="closeHandoffModal()">
+
+    <section class="modal-card modal-card--close" (click)="$event.stopPropagation()">
+
+      <div class="modal-header">
+
+        <div>
+
+          <span class="section-kicker">
+            CIERRE DE CAJA
+          </span>
+
+          <h2>
+            Cerrar caja
+          </h2>
+
+          <p>
+            Responsable: {{ handoffPersonName }}
+          </p>
+
+        </div>
+
+        <button type="button" class="modal-close" (click)="closeHandoffModal()">
+          ×
+        </button>
+
+      </div>
+
+
+      <div class="closing-summary">
+
+        <div class="closing-row">
+
+          <span>
+            Caja inicial
+          </span>
+
+          <strong>
+            S/ {{ formatMoney(initialBalance) }}
+          </strong>
+
+        </div>
+
+
+        <div class="closing-row">
+
+          <span>
+            Total ingresos
+          </span>
+
+          <strong>
+            S/ {{ formatMoney(totalGeneral) }}
+          </strong>
+
+        </div>
+
+
+        <div class="closing-row">
+
+          <span>
+            Ingresos en efectivo
+          </span>
+
+          <strong>
+            S/ {{ formatMoney(totalEfectivo) }}
+          </strong>
+
+        </div>
+
+
+        <div class="closing-row">
+
+          <span>
+            PLIN
+          </span>
+
+          <strong>
+            S/ {{ formatMoney(totalPLIN) }}
+          </strong>
+
+        </div>
+
+
+        <div class="closing-row">
+
+          <span>
+            Gastos / Egresos
+          </span>
+
+          <strong class="amount-negative">
+            S/ {{ formatMoney(totalExpenses) }}
+          </strong>
+
+        </div>
+
+
+        <div class="closing-divider"></div>
+
+
+        <div class="closing-row closing-row--total">
+
+          <span>
+            Saldo final
+          </span>
+
+          <strong>
+            S/ {{ formatMoney(expectedCash) }}
+          </strong>
+
+        </div>
+
+
+        <div class="closing-row closing-row--expected">
+
+          <span>
+            Efectivo esperado
+          </span>
+
+          <strong>
+            S/ {{ formatMoney(expectedCash) }}
+          </strong>
+
+        </div>
+
+      </div>
+
+
+      <div class="field">
+
+        <label for="countedAmount">
+          EFECTIVO ENCONTRADO *
+        </label>
+
+        <div class="money-input">
+
+          <span>
+            S/
+          </span>
+
+          <input id="countedAmount" type="number" min="0" step="0.10" [(ngModel)]="countedAmount"
+            (input)="onCountedAmountChange()" />
+
+        </div>
+
+      </div>
+
+
+      <div class="difference-box" [class]="getDifferenceClass(difference)">
+
+        <span>
+          DIFERENCIA
+        </span>
+
+        <strong>
+
+          @if (difference > 0) {
+
+          + S/ {{ formatMoney(difference) }}
+
+          } @else if (difference < 0) { − S/ {{ formatMoney(abs(difference)) }} } @else { S/ 0.00 } </strong>
+
+
+            <small>
+
+              @if (difference === 0) {
+
+              La caja está cuadrada.
+
+              } @else if (difference > 0) {
+
+              Hay un sobrante de efectivo.
+
+              } @else {
+
+              Hay un faltante de efectivo.
+
+              }
+
+            </small>
+
+      </div>
+
+
+      <div class="modal-actions">
+
+        <button type="button" class="secondary-button" (click)="closeHandoffModal()">
+          Cancelar
+        </button>
+
+        <button type="button" class="primary-button" (click)="confirmHandoff()">
+          Confirmar cierre
+        </button>
+
+      </div>
+
+    </section>
+
+  </div>
+
+  }
+
+
+  <!-- ===================================================== -->
+  <!-- MODAL EGRESO -->
+  <!-- ===================================================== -->
+
+  @if (showExpenseModal) {
+
+  <div class="modal-backdrop" (click)="closeExpenseModal()">
+
+    <section class="modal-card" (click)="$event.stopPropagation()">
+
+      <div class="modal-header">
+
+        <div>
+
+          <span class="section-kicker">
+            CAJA
+          </span>
+
+          <h2>
+            Registrar egreso
+          </h2>
+
+          <p>
+            Registra dinero que salió de la caja del hotel.
+          </p>
+
+        </div>
+
+        <button type="button" class="modal-close" (click)="closeExpenseModal()">
+          ×
+        </button>
+
+      </div>
+
+
+      <div class="modal-body">
+
+        <div class="field">
+
+          <label for="expenseDescription">
+            DESCRIPCIÓN *
+          </label>
+
+          <input id="expenseDescription" type="text" [(ngModel)]="expenseDescription" placeholder="¿En qué se gastó?"
+            autocomplete="off" />
+
+        </div>
+
+
+        <div class="field">
+
+          <label for="expenseAmount">
+            MONTO *
+          </label>
+
+          <div class="money-input">
+
+            <span>
+              S/
+            </span>
+
+            <input id="expenseAmount" type="number" min="0.10" step="0.10" [(ngModel)]="expenseAmount"
+              placeholder="0.00" />
+
+          </div>
+
+        </div>
+
+      </div>
+
+
+      <div class="modal-actions">
+
+        <button type="button" class="secondary-button" (click)="closeExpenseModal()">
+          Cancelar
+        </button>
+
+        <button type="button" class="primary-button" (click)="confirmExpense()">
+          Registrar egreso
+        </button>
+
+      </div>
+
+    </section>
+
+  </div>
+
+  }
+
+
+  <!-- ===================================================== -->
+  <!-- TICKET RESERVA / CONSUMO -->
+  <!-- ===================================================== -->
+
+  @if (
+  showOperationModal &&
+  selectedOperation
+  ) {
+
+  <div class="ticket-backdrop" (click)="closeOperationModal()">
+
+    <section class="ticket" (click)="$event.stopPropagation()">
+
+      <div class="ticket__top">
+
+        <strong>
+          HOTEL GIRASOLES
+        </strong>
+
+        <span>
+          ARQUEO DE CAJA
+        </span>
+
+      </div>
+
+
+      <div class="ticket__line"></div>
+
+
+      <div class="ticket__title">
+
+        @if (
+        selectedOperation.type === 'RESERVA'
+        ) {
+
+        PAGO DE RESERVA
+
+        } @else {
+
+        PAGO DE CONSUMO
+
+        }
+
+      </div>
+
+
+      @if (
+      selectedOperation.reservation
+      ) {
+
+      <div class="ticket__section">
+
+        <div class="ticket__row">
+
+          <span>
+            HABITACIÓN
+          </span>
+
+          <strong>
+            {{
+            selectedOperation
+            .reservation
+            .room
+            ?.roomNumber || '—'
+            }}
+          </strong>
+
+        </div>
+
+
+        <div class="ticket__row">
+
+          <span>
+            DNI
+          </span>
+
+          <strong>
+            {{
+            selectedOperation
+            .reservation
+            .guestDni || '—'
+            }}
+          </strong>
+
+        </div>
+
+
+        <div class="ticket__row">
+
+          <span>
+            HUÉSPED
+          </span>
+
+          <strong>
+            {{
+            selectedOperation
+            .reservation
+            .guestName || '—'
+            }}
+          </strong>
+
+        </div>
+
+
+        <div class="ticket__row">
+
+          <span>
+            PAGO
+          </span>
+
+          <strong>
+            {{
+            getPaymentLabel(
+            selectedOperation
+            .reservation
+            .paymentMethod
+            )
+            }}
+          </strong>
+
+        </div>
+
+
+        <div class="ticket__row">
+
+          <span>
+            INGRESO
+          </span>
+
+          <strong>
+            {{
+            formatDateTime(
+            selectedOperation
+            .reservation
+            .checkIn
+            )
+            }}
+          </strong>
+
+        </div>
+
+
+        @if (
+        selectedOperation
+        .reservation
+        .finishedAt
+        ) {
+
+        <div class="ticket__row">
+
+          <span>
+            SALIDA
+          </span>
+
+          <strong>
+            {{
+            formatDateTime(
+            selectedOperation
+            .reservation
+            .finishedAt!
+            )
+            }}
+          </strong>
+
+        </div>
+
+        }
+
+      </div>
+
+      }
+
+
+      @if (
+      selectedOperation.type === 'RESERVA'
+      ) {
+
+      <div class="ticket__section">
+
+        <div class="ticket__row">
+
+          <span>
+            HABITACIÓN
+          </span>
+
+          <strong>
+            S/
+            {{
+            formatMoney(
+            selectedOperation.totalRoom
+            )
+            }}
+          </strong>
+
+        </div>
+
+
+        @if (
+        selectedOperation.totalConsumption > 0
+        ) {
+
+        <div class="ticket__row">
+
+          <span>
+            CONSUMOS
+          </span>
+
+          <strong>
+            S/
+            {{
+            formatMoney(
+            selectedOperation.totalConsumption
+            )
+            }}
+          </strong>
+
+        </div>
+
+        }
+
+      </div>
+
+      } @else {
+
+      @if (
+      selectedOperation.consumption
+      ) {
+
+      <div class="ticket__section">
+
+        <div class="ticket__row">
+
+          <span>
+            HABITACIÓN
+          </span>
+
+          <strong>
+            {{
+            selectedOperation
+            .consumption
+            .reservation
+            ?.room
+            ?.roomNumber || '—'
+            }}
+          </strong>
+
+        </div>
+
+
+        <div class="ticket__row">
+
+          <span>
+            PAGO
+          </span>
+
+          <strong>
+            {{
+            getPaymentLabel(
+            selectedOperation
+            .consumption
+            .paymentMethod
+            )
+            }}
+          </strong>
+
+        </div>
+
+      </div>
+
+      }
+
+      }
+
+
+      <div class="ticket__line"></div>
+
+
+      <div class="ticket__total">
+
+        <span>
+          TOTAL
+        </span>
+
+        <strong>
+          S/
+          {{
+          formatMoney(
+          selectedOperation.total
+          )
+          }}
+        </strong>
+
+      </div>
+
+
+      <div class="ticket__payment-split">
+
+        <span>
+          Efectivo:
+          S/
+          {{
+          formatMoney(
+          selectedOperation.cashTotal
+          )
+          }}
+        </span>
+
+        <span>
+          PLIN:
+          S/
+          {{
+          formatMoney(
+          selectedOperation.PLINTotal
+          )
+          }}
+        </span>
+
+      </div>
+
+
+      <div class="ticket__line"></div>
+
+
+      <button type="button" class="ticket__close" (click)="closeOperationModal()">
+        Cerrar
+      </button>
+
+    </section>
+
+  </div>
+
+  }
+
+
+  <!-- ===================================================== -->
+  <!-- TICKET GASTO PERSONAL -->
+  <!-- ===================================================== -->
+
+  @if (
+  showPersonalExpenseModal &&
+  selectedPersonalExpense
+  ) {
+
+  <div class="ticket-backdrop" (click)="closePersonalExpenseModal()">
+
+    <section class="ticket ticket--personal" (click)="$event.stopPropagation()">
+
+      <div class="ticket__top">
+
+        <strong>
+          HOTEL GIRASOLES
+        </strong>
+
+        <span>
+          GASTO DE PERSONAL
+        </span>
+
+      </div>
+
+
+      <div class="ticket__line"></div>
+
+
+      <div class="ticket__title">
+        CONSUMO DE PERSONAL
+      </div>
+
+
+      <div class="ticket__section">
+
+
+        <div class="ticket__row">
+
+          <span>
+            FECHA
+          </span>
+
+          <strong>
+            {{
+            formatDateTime(
+            selectedPersonalExpense
+            .expense
+            .createdAt
+            )
+            }}
+          </strong>
+
+        </div>
+
+
+        <div class="ticket__row">
+
+          <span>
+            MOTIVO
+          </span>
+
+          <strong>
+            {{
+            selectedPersonalExpense
+            .expense
+            .description
+            }}
+          </strong>
+
+        </div>
+
+
+        <div class="ticket__row">
+
+          <span>
+            PRODUCTO
+          </span>
+
+          <strong>
+            {{
+            selectedPersonalExpense
+            .expense
+            .productName || '—'
+            }}
+          </strong>
+
+        </div>
+
+
+        <div class="ticket__row">
+
+          <span>
+            CANTIDAD
+          </span>
+
+          <strong>
+            {{
+            selectedPersonalExpense
+            .stockQuantity
+            }}
+            unidad(es)
+          </strong>
+
+        </div>
+
+
+        <div class="ticket__row">
+
+          <span>
+            PAGO
+          </span>
+
+          <strong>
+            {{
+            selectedPersonalExpense
+            .paymentLabel
+            }}
+          </strong>
+
+        </div>
+
+      </div>
+
+
+      <div class="ticket__line"></div>
+
+
+      <div class="ticket__total">
+
+        <span>
+          IMPORTE DEL PRODUCTO
+        </span>
+
+        <strong>
+          S/
+          {{
+          formatMoney(
+          selectedPersonalExpense
+          .expense
+          .amount
+          )
+          }}
+        </strong>
+
+      </div>
+
+
+      <!-- ================================================= -->
+      <!-- IMPACTO EN CAJA -->
+      <!-- ================================================= -->
+
+      <div class="personal-ticket-impact">
+
+
+        @if (
+        selectedPersonalExpense
+        .expense
+        .cashEffect === 'INGRESO'
+        ) {
+
+        <strong>
+          Entrada de Caja:
+          S/
+          {{
+          formatMoney(
+          selectedPersonalExpense
+          .expense
+          .amount
+          )
+          }}
+        </strong>
+
+        <span>
+          El trabajador pagó con su dinero.
+          El stock también fue descontado.
+        </span>
+
+
+        } @else if (
+        selectedPersonalExpense
+        .expense
+        .cashEffect === 'EGRESO'
+        ) {
+
+        <strong>
+          Salida de Caja:
+          S/
+          {{
+          formatMoney(
+          selectedPersonalExpense
+          .expense
+          .amount
+          )
+          }}
+        </strong>
+
+        <span>
+          El gasto fue pagado con dinero de Caja.
+          También se descontó del stock si corresponde.
+        </span>
+
+
+        } @else {
+
+        <strong>
+          Movimiento de Caja:
+          S/ 0.00
+        </strong>
+
+        <span>
+          Quedó a cuenta del trabajador.
+          El stock sí fue descontado, pero no afecta Caja.
+        </span>
+
+        }
+
+      </div>
+
+
+      <div class="ticket__line"></div>
+
+
+      <button type="button" class="ticket__close" (click)="closePersonalExpenseModal()">
+        Cerrar
+      </button>
+
+    </section>
+
+  </div>
+
+  }
+
+</section>

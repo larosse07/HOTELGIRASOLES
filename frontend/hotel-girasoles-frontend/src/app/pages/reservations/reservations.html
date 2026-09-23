@@ -1,0 +1,557 @@
+<div class="reservations-container">
+
+  <header class="page-top-bar">
+
+    <h1 class="page-title">
+      Reservas
+    </h1>
+
+    <a routerLink="/reservations/new" class="btn-crear-reserva">
+      + Crear Reserva
+    </a>
+
+  </header>
+
+
+  <div class="search-bar-wrap">
+
+    <div class="search-box">
+
+      <span class="search-icon">
+        🔍
+      </span>
+
+      <input type="text" [(ngModel)]="search" (input)="onSearchChange()"
+        placeholder="Buscar reserva, huésped o habitación..." />
+
+    </div>
+
+  </div>
+
+
+  <div class="alert alert-error" *ngIf="error">
+    ⚠️ {{ error }}
+  </div>
+
+  <div class="alert alert-success" *ngIf="success">
+    ✅ {{ success }}
+  </div>
+
+
+  <!-- =====================================================
+       TABLA — PC / TABLET
+  ====================================================== -->
+
+  <div class="table-card-wrap desktop-reservations" *ngIf="filteredReservations.length > 0">
+
+    <table class="reservations-table">
+
+      <thead>
+
+        <tr>
+          <th>Reserva</th>
+          <th>Huésped</th>
+          <th>Habitación</th>
+          <th>Ingreso</th>
+          <th>Salida est.</th>
+          <th>Estado</th>
+          <th>Total</th>
+          <th>Acción</th>
+        </tr>
+
+      </thead>
+
+
+      <tbody>
+
+        <tr *ngFor="let reservation of paginatedReservations">
+
+          <td>
+
+            <strong class="col-reserva">
+              #{{ reservation.id | number:'3.0-0' }}
+            </strong>
+
+          </td>
+
+
+          <td>
+
+            <span class="col-huesped" [title]="reservation.guestName">
+              {{ reservation.guestName }}
+            </span>
+
+          </td>
+
+
+          <td>
+
+            <span class="col-habitacion">
+              Hab. {{ reservation.room.roomNumber }}
+            </span>
+
+          </td>
+
+
+          <td>
+
+            <span class="col-time">
+              {{ reservation.checkIn | date:'h:mm a' }}
+            </span>
+
+          </td>
+
+
+          <td>
+
+            <span class="col-time">
+
+              <ng-container *ngIf="
+                  reservation.status === 'FINALIZADA' &&
+                  reservation.finishedAt;
+                  else estimatedCheckout
+                ">
+                {{ reservation.finishedAt | date:'h:mm a' }}
+              </ng-container>
+
+              <ng-template #estimatedCheckout>
+                {{ reservation.estimatedCheckOut | date:'h:mm a' }}
+              </ng-template>
+
+            </span>
+
+          </td>
+
+
+          <td>
+
+            <span class="status-tag" [class.status-ocupado]="
+                statusLabel(reservation) === 'OCUPADO'
+              " [class.status-retirado]="
+                statusLabel(reservation) === 'RETIRADO'
+              ">
+              {{ statusLabel(reservation) }}
+            </span>
+
+          </td>
+
+
+          <td>
+
+            <strong class="col-total">
+              S/
+              {{ getReservationTotal(reservation) | number:'1.2-2' }}
+            </strong>
+
+          </td>
+
+
+          <td>
+
+            <div class="action-buttons-cell">
+
+              <button type="button" class="btn-icon-cell" [disabled]="!hasConsumption(reservation)"
+                [class.has-consumption]="hasConsumption(reservation)" (click)="viewReservationVoucher(reservation)"
+                [title]="
+                  hasConsumption(reservation)
+                    ? 'Ver consumo'
+                    : 'Sin consumo'
+                ">
+                👁️
+              </button>
+
+            </div>
+
+          </td>
+
+        </tr>
+
+      </tbody>
+
+    </table>
+
+
+    <div class="table-footer-bar" *ngIf="filteredReservations.length > 0">
+
+      <span class="pagination-info">
+
+        Mostrando
+        {{ paginationStart }}
+        -
+        {{ paginationEnd }}
+        de
+        {{ filteredReservations.length }}
+        reservas
+
+      </span>
+
+
+      <div class="pagination-controls">
+
+        <button type="button" class="btn-page-arrow" [disabled]="currentPage === 1" (click)="previousPage()">
+          ‹
+        </button>
+
+
+        <button *ngFor="let page of pages" type="button" class="btn-page-num" [class.active]="currentPage === page"
+          (click)="goToPage(page)">
+          {{ page }}
+        </button>
+
+
+        <button type="button" class="btn-page-arrow" [disabled]="currentPage === totalPages" (click)="nextPage()">
+          ›
+        </button>
+
+      </div>
+
+    </div>
+
+  </div>
+
+
+  <!-- =====================================================
+       CARDS — CELULAR
+  ====================================================== -->
+
+  <div class="mobile-reservation-cards" *ngIf="filteredReservations.length > 0">
+
+    <article class="reservation-card" *ngFor="let reservation of paginatedReservations">
+
+      <!-- CABECERA CARD -->
+
+      <div class="reservation-card-header">
+
+        <div>
+
+          <span class="reservation-card-label">
+            RESERVA
+          </span>
+
+          <strong class="reservation-card-id">
+            #{{ reservation.id | number:'3.0-0' }}
+          </strong>
+
+        </div>
+
+
+        <span class="status-tag" [class.status-ocupado]="
+            statusLabel(reservation) === 'OCUPADO'
+          " [class.status-retirado]="
+            statusLabel(reservation) === 'RETIRADO'
+          ">
+          {{ statusLabel(reservation) }}
+        </span>
+
+      </div>
+
+
+      <!-- HUÉSPED -->
+
+      <div class="reservation-card-guest">
+
+        <span class="reservation-card-label">
+          HUÉSPED
+        </span>
+
+        <strong>
+          {{ reservation.guestName }}
+        </strong>
+
+      </div>
+
+
+      <!-- INFORMACIÓN -->
+
+      <div class="reservation-card-info">
+
+        <div class="reservation-card-item">
+
+          <span>
+            HABITACIÓN
+          </span>
+
+          <strong>
+            Hab. {{ reservation.room.roomNumber }}
+          </strong>
+
+        </div>
+
+
+        <div class="reservation-card-item">
+
+          <span>
+            INGRESO
+          </span>
+
+          <strong>
+            {{ reservation.checkIn | date:'h:mm a' }}
+          </strong>
+
+        </div>
+
+
+        <div class="reservation-card-item">
+
+          <span>
+            SALIDA EST.
+          </span>
+
+          <strong>
+
+            <ng-container *ngIf="
+                reservation.status === 'FINALIZADA' &&
+                reservation.finishedAt;
+                else mobileEstimatedCheckout
+              ">
+              {{ reservation.finishedAt | date:'h:mm a' }}
+            </ng-container>
+
+            <ng-template #mobileEstimatedCheckout>
+              {{ reservation.estimatedCheckOut | date:'h:mm a' }}
+            </ng-template>
+
+          </strong>
+
+        </div>
+
+
+        <div class="reservation-card-item reservation-card-total">
+
+          <span>
+            TOTAL
+          </span>
+
+          <strong>
+            S/
+            {{ getReservationTotal(reservation) | number:'1.2-2' }}
+          </strong>
+
+        </div>
+
+      </div>
+
+
+      <!-- ACCIÓN -->
+
+      <div class="reservation-card-actions">
+
+        <button type="button" class="reservation-card-view" [disabled]="!hasConsumption(reservation)"
+          [class.has-consumption]="hasConsumption(reservation)" (click)="viewReservationVoucher(reservation)">
+
+          <span>👁️</span>
+
+          <span>
+            {{
+            hasConsumption(reservation)
+            ? 'Ver consumo'
+            : 'Sin consumo'
+            }}
+          </span>
+
+        </button>
+
+      </div>
+
+    </article>
+
+
+    <!-- PAGINACIÓN MÓVIL -->
+
+    <div class="mobile-pagination">
+
+      <span class="pagination-info">
+
+        {{ paginationStart }}
+        -
+        {{ paginationEnd }}
+        de
+        {{ filteredReservations.length }}
+
+      </span>
+
+
+      <div class="pagination-controls">
+
+        <button type="button" class="btn-page-arrow" [disabled]="currentPage === 1" (click)="previousPage()">
+          ‹
+        </button>
+
+
+        <button *ngFor="let page of pages" type="button" class="btn-page-num" [class.active]="currentPage === page"
+          (click)="goToPage(page)">
+          {{ page }}
+        </button>
+
+
+        <button type="button" class="btn-page-arrow" [disabled]="currentPage === totalPages" (click)="nextPage()">
+          ›
+        </button>
+
+      </div>
+
+    </div>
+
+  </div>
+
+
+  <!-- =====================================================
+       SIN RESERVAS
+  ====================================================== -->
+
+  <div class="empty-table-msg" *ngIf="filteredReservations.length === 0">
+    No hay reservas registradas.
+  </div>
+
+</div>
+
+
+<!-- =======================================================
+     MODAL AGREGAR CONSUMO
+======================================================== -->
+
+<div class="modal-overlay" *ngIf="showAddProductModal">
+
+  <div class="modal-card">
+
+    <div class="modal-header">
+
+      <h2>
+        Añadir consumo
+      </h2>
+
+
+      <button type="button" class="modal-close" (click)="closeAddProductModal()">
+        ×
+      </button>
+
+    </div>
+
+
+    <div class="modal-body">
+
+      <div class="form-group" *ngIf="selectedReservationForProduct">
+
+        <label>
+          Huésped
+        </label>
+
+        <input type="text" [value]="selectedReservationForProduct.guestName" readonly />
+
+      </div>
+
+
+      <div class="form-group" *ngIf="selectedReservationForProduct">
+
+        <label>
+          Habitación
+        </label>
+
+        <input type="text" [value]="
+            'Hab. ' +
+            selectedReservationForProduct.room.roomNumber
+          " readonly />
+
+      </div>
+
+
+      <div class="form-group">
+
+        <label>
+          Producto
+        </label>
+
+        <select [(ngModel)]="selectedProductId">
+
+          <option *ngFor="let product of products" [ngValue]="product.id">
+            {{ product.name }}
+            —
+            S/ {{ product.price | number:'1.2-2' }}
+          </option>
+
+        </select>
+
+      </div>
+
+
+      <div class="form-group">
+
+        <label>
+          Cantidad
+        </label>
+
+        <input type="number" min="1" [max]="selectedProduct?.stock || 1" [(ngModel)]="productQuantity" />
+
+      </div>
+
+
+      <div class="form-group">
+
+        <label>
+          Forma de pago
+        </label>
+
+        <select [(ngModel)]="consumptionPaymentOption">
+
+          <option value="PAGADO_EFECTIVO">
+            Pagado - Efectivo
+          </option>
+
+          <option value="PAGADO_PLIN">
+            Pagado - PLIN
+          </option>
+
+          <option value="SIN_PAGAR">
+            Sin pagar
+          </option>
+
+        </select>
+
+      </div>
+
+
+      <div class="form-group">
+
+        <label>
+          Subtotal
+        </label>
+
+        <input type="text" [value]="
+            'S/ ' +
+            (consumptionSubtotal | number:'1.2-2')
+          " readonly />
+
+      </div>
+
+    </div>
+
+
+    <div class="modal-footer">
+
+      <button type="button" class="btn-modal-secondary" (click)="closeAddProductModal()">
+        Cancelar
+      </button>
+
+
+      <button type="button" class="btn-modal-primary" [disabled]="savingProduct" (click)="saveProductConsumption()">
+        {{
+        savingProduct
+        ? 'Registrando...'
+        : 'Registrar consumo'
+        }}
+      </button>
+
+    </div>
+
+  </div>
+
+</div>
+
+
+<!-- =======================================================
+     VOUCHER
+======================================================== -->
+
+<app-voucher-modal *ngIf="showVoucherModal" [visible]="showVoucherModal" [voucher]="activeVoucher"
+  (closed)="showVoucherModal = false">
+</app-voucher-modal>

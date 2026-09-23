@@ -1,0 +1,765 @@
+<div class="consumptions-page-layout">
+
+  <div class="alert alert-error" *ngIf="error">
+    ⚠️ {{ error }}
+  </div>
+
+  <div class="alert alert-success" *ngIf="success">
+    ✅ {{ success }}
+  </div>
+
+
+  <div class="two-columns-grid">
+
+
+    <!-- =====================================================
+         COLUMNA IZQUIERDA: PRODUCTOS
+         ===================================================== -->
+
+    <section class="products-list-section">
+
+      <h2 class="section-title">
+        Productos
+      </h2>
+
+      <div class="products-table-wrap">
+
+        <table class="products-table">
+
+          <thead>
+            <tr>
+              <th>PRODUCTO</th>
+              <th>CATEGORÍA</th>
+              <th>PRECIO</th>
+              <th>STOCK</th>
+            </tr>
+          </thead>
+
+          <tbody>
+
+            <tr *ngFor="let product of products" class="product-clickable-row" (click)="addToOrder(product)"
+              title="Click para agregar a la comanda">
+
+              <td>
+                <strong class="prod-name">
+                  {{ product.name }}
+                </strong>
+              </td>
+
+              <td>
+                <span class="prod-category">
+                  {{ getCategory(product) }}
+                </span>
+              </td>
+
+              <td>
+                <span class="prod-price">
+                  S/ {{ product.price | number:'1.2-2' }}
+                </span>
+              </td>
+
+              <td>
+                <span class="prod-stock-badge" [class.badge-green]="product.stock >= 10"
+                  [class.badge-orange]="product.stock < 10 && product.stock > 0"
+                  [class.badge-infinity]="product.stock >= 99">
+
+                  {{ product.stock >= 99 ? '∞' : product.stock }}
+
+                </span>
+              </td>
+
+            </tr>
+
+
+            <tr *ngIf="products.length === 0">
+
+              <td colspan="4" class="empty-products-td">
+                Cargando productos...
+              </td>
+
+            </tr>
+
+          </tbody>
+
+        </table>
+
+      </div>
+
+    </section>
+
+
+    <!-- =====================================================
+         NUEVA RESERVA + PRODUCTO
+         ===================================================== -->
+
+    <section class="consumption-order-card initial-reservation-card" *ngIf="initialProductMode && initialReservation">
+
+      <div class="mode-badge">
+        NUEVA RESERVA + PRODUCTO
+      </div>
+
+      <h2 class="section-title">
+        Registro de huésped
+      </h2>
+
+      <div class="order-form-body">
+
+
+        <div class="guest-summary">
+
+          <div class="guest-summary-row">
+            <span>
+              DNI
+            </span>
+
+            <strong>
+              {{ initialReservation.guestDni }}
+            </strong>
+          </div>
+
+
+          <div class="guest-summary-row">
+            <span>
+              HUÉSPED
+            </span>
+
+            <strong>
+              {{ initialReservation.guestName }}
+            </strong>
+          </div>
+
+
+          <div class="guest-summary-row">
+            <span>
+              HABITACIÓN
+            </span>
+
+            <strong>
+              Hab. {{ initialReservation.roomNumber }}
+            </strong>
+          </div>
+
+
+          <div class="guest-summary-row">
+            <span>
+              ESTADÍA
+            </span>
+
+            <strong>
+              {{ initialHoursLabel }}
+            </strong>
+          </div>
+
+        </div>
+
+
+        <div class="initial-room-price">
+
+          <div>
+
+            <span>
+              HABITACIÓN
+            </span>
+
+            <small>
+              Pago
+              {{
+              initialReservation.paymentMethod === 'PLIN'
+              ? 'PLIN'
+              : 'Efectivo'
+              }}
+            </small>
+
+          </div>
+
+          <strong>
+            S/ {{ initialRoomPrice | number:'1.2-2' }}
+          </strong>
+
+        </div>
+
+
+        <div class="form-row-group">
+
+          <label class="group-label">
+            PRODUCTOS
+          </label>
+
+
+          <div class="order-table-wrap">
+
+            <table class="order-table">
+
+              <thead>
+
+                <tr>
+
+                  <th>
+                    PRODUCTO
+                  </th>
+
+                  <th class="text-center">
+                    CANT.
+                  </th>
+
+                  <th class="text-right">
+                    PRECIO
+                  </th>
+
+                  <th class="text-right">
+                    SUBTOTAL
+                  </th>
+
+                  <th></th>
+
+                </tr>
+
+              </thead>
+
+
+              <tbody>
+
+                <tr *ngFor="let line of orderLines; let i = index">
+
+                  <td>
+
+                    <span class="order-prod-name">
+                      {{ line.product.name }}
+                    </span>
+
+                  </td>
+
+
+                  <td class="text-center">
+
+                    <div class="quantity-control">
+
+                      <button type="button" class="quantity-btn" (click)="decreaseQuantity(i)"
+                        [disabled]="line.quantity <= 1" title="Disminuir cantidad">
+
+                        −
+
+                      </button>
+
+
+                      <span class="order-qty">
+                        {{ line.quantity }}
+                      </span>
+
+
+                      <button type="button" class="quantity-btn" (click)="increaseQuantity(i)"
+                        [disabled]="line.quantity >= line.product.stock" title="Aumentar cantidad">
+
+                        +
+
+                      </button>
+
+                    </div>
+
+                  </td>
+
+
+                  <td class="text-right">
+
+                    <span class="order-price">
+                      S/
+                      {{ line.product.price | number:'1.2-2' }}
+                    </span>
+
+                  </td>
+
+
+                  <td class="text-right">
+
+                    <span class="order-line-sub">
+                      S/
+                      {{
+                      (line.product.price * line.quantity)
+                      | number:'1.2-2'
+                      }}
+                    </span>
+
+                  </td>
+
+
+                  <td class="text-center">
+
+                    <button type="button" class="btn-trash" (click)="removeOrderLine(i)" title="Quitar producto">
+
+                      🗑️
+
+                    </button>
+
+                  </td>
+
+                </tr>
+
+
+                <tr *ngIf="orderLines.length === 0">
+
+                  <td colspan="5" class="empty-order-td">
+
+                    Selecciona productos de la tabla izquierda para agregarlos.
+
+                  </td>
+
+                </tr>
+
+              </tbody>
+
+            </table>
+
+          </div>
+
+        </div>
+
+
+        <button type="button" class="btn-outline-add" (click)="showSelectProductModal = true">
+
+          + Añadir producto
+
+        </button>
+
+
+        <div class="initial-total-box">
+
+          <div>
+
+            <span>
+              HABITACIÓN
+            </span>
+
+            <strong>
+              S/ {{ initialRoomPrice | number:'1.2-2' }}
+            </strong>
+
+          </div>
+
+
+          <div>
+
+            <span>
+              PRODUCTOS
+            </span>
+
+            <strong>
+              S/ {{ orderSubtotal | number:'1.2-2' }}
+            </strong>
+
+          </div>
+
+
+          <div class="initial-total-final">
+
+            <span>
+              TOTAL A PAGAR
+            </span>
+
+            <strong>
+              S/ {{ initialGrandTotal | number:'1.2-2' }}
+            </strong>
+
+          </div>
+
+        </div>
+
+
+        <div class="form-row-group">
+
+          <label class="group-label">
+            MÉTODO DE PAGO
+          </label>
+
+
+          <div class="segmented-control">
+
+            <button type="button" class="seg-btn payment-cash" [class.active]="paymentMethod === 'EFECTIVO'"
+              (click)="paymentMethod = 'EFECTIVO'">
+
+              💵 Efectivo
+
+            </button>
+
+
+            <button type="button" class="seg-btn payment-PLIN" [class.active]="paymentMethod === 'PLIN'"
+              (click)="paymentMethod = 'PLIN'">
+
+              PLIN
+
+            </button>
+
+          </div>
+
+        </div>
+
+
+        <div class="initial-actions">
+
+          <button type="button" class="btn-cancel-initial" [disabled]="savingConsumption"
+            (click)="cancelInitialConsumption()">
+
+            Cancelar
+
+          </button>
+
+
+          <button type="button" class="btn-pay-all" [disabled]="savingConsumption || orderLines.length === 0"
+            (click)="payEverything()">
+
+            {{
+            savingConsumption
+            ? 'PROCESANDO PAGO...'
+            : 'PAGAR TODO · S/ ' +
+            (initialGrandTotal | number:'1.2-2')
+            }}
+
+          </button>
+
+        </div>
+
+      </div>
+
+    </section>
+
+
+    <!-- =====================================================
+         CONSUMO NORMAL DE HUÉSPED
+         ===================================================== -->
+
+    <section class="consumption-order-card" *ngIf="!initialProductMode">
+
+      <h2 class="section-title">
+        Agregar consumo a habitación
+      </h2>
+
+
+      <div class="order-form-body">
+
+
+        <div class="form-row-group">
+
+          <label class="group-label">
+            HABITACIÓN OCUPADA
+          </label>
+
+
+          <div class="custom-select-box">
+
+            <select [(ngModel)]="selectedReservationId">
+
+              <option [ngValue]="null" *ngIf="!activeReservations.length">
+
+                -- No hay habitaciones ocupadas --
+
+              </option>
+
+
+              <option *ngFor="let res of activeReservations" [ngValue]="res.id">
+
+                Hab. {{ res.room.roomNumber }}
+                -
+                {{ res.guestName }}
+
+              </option>
+
+            </select>
+
+          </div>
+
+        </div>
+
+
+        <div class="form-row-group">
+
+          <label class="group-label">
+            CONSUMOS ACTUALES
+          </label>
+
+
+          <div class="order-table-wrap">
+
+            <table class="order-table">
+
+              <thead>
+
+                <tr>
+
+                  <th>
+                    PRODUCTO
+                  </th>
+
+                  <th class="text-center">
+                    CANT.
+                  </th>
+
+                  <th class="text-right">
+                    PRECIO
+                  </th>
+
+                  <th class="text-right">
+                    SUBTOTAL
+                  </th>
+
+                  <th></th>
+
+                </tr>
+
+              </thead>
+
+
+              <tbody>
+
+                <tr *ngFor="let line of orderLines; let i = index">
+
+                  <td>
+
+                    <span class="order-prod-name">
+                      {{ line.product.name }}
+                    </span>
+
+                  </td>
+
+
+                  <td class="text-center">
+
+                    <div class="quantity-control">
+
+                      <button type="button" class="quantity-btn" (click)="decreaseQuantity(i)"
+                        [disabled]="line.quantity <= 1" title="Disminuir cantidad">
+
+                        −
+
+                      </button>
+
+
+                      <span class="order-qty">
+                        {{ line.quantity }}
+                      </span>
+
+
+                      <button type="button" class="quantity-btn" (click)="increaseQuantity(i)"
+                        [disabled]="line.quantity >= line.product.stock" title="Aumentar cantidad">
+
+                        +
+
+                      </button>
+
+                    </div>
+
+                  </td>
+
+
+                  <td class="text-right">
+
+                    <span class="order-price">
+                      S/
+                      {{ line.product.price | number:'1.2-2' }}
+                    </span>
+
+                  </td>
+
+
+                  <td class="text-right">
+
+                    <span class="order-line-sub">
+                      S/
+                      {{
+                      (line.product.price * line.quantity)
+                      | number:'1.2-2'
+                      }}
+                    </span>
+
+                  </td>
+
+
+                  <td class="text-center">
+
+                    <button type="button" class="btn-trash" (click)="removeOrderLine(i)" title="Quitar producto">
+
+                      🗑️
+
+                    </button>
+
+                  </td>
+
+                </tr>
+
+
+                <tr *ngIf="orderLines.length === 0">
+
+                  <td colspan="5" class="empty-order-td">
+
+                    Selecciona productos de la tabla izquierda para agregarlos.
+
+                  </td>
+
+                </tr>
+
+              </tbody>
+
+            </table>
+
+          </div>
+
+        </div>
+
+
+        <div class="order-subtotal-row">
+
+          <span class="subtotal-label">
+            SUBTOTAL
+          </span>
+
+          <strong class="subtotal-amount">
+            S/ {{ orderSubtotal | number:'1.2-2' }}
+          </strong>
+
+        </div>
+
+
+        <button type="button" class="btn-outline-add" (click)="showSelectProductModal = true">
+
+          + Añadir producto
+
+        </button>
+
+
+        <div class="form-row-group">
+
+          <label class="group-label">
+            ESTADO DEL PAGO
+          </label>
+
+
+          <div class="segmented-control">
+
+            <button type="button" class="seg-btn" [class.active]="cargoStatus === 'CARGO'"
+              (click)="cargoStatus = 'CARGO'">
+
+              A cuenta
+
+            </button>
+
+
+            <button type="button" class="seg-btn" [class.active]="cargoStatus === 'PAGADO'"
+              (click)="cargoStatus = 'PAGADO'">
+
+              Pagado
+
+            </button>
+
+          </div>
+
+        </div>
+
+
+        <div class="form-row-group" *ngIf="cargoStatus === 'PAGADO'">
+
+          <label class="group-label">
+            MÉTODO DE PAGO
+          </label>
+
+
+          <div class="segmented-control">
+
+            <button type="button" class="seg-btn payment-cash" [class.active]="paymentMethod === 'EFECTIVO'"
+              (click)="paymentMethod = 'EFECTIVO'">
+
+              💵 Efectivo
+
+            </button>
+
+
+            <button type="button" class="seg-btn payment-PLIN" [class.active]="paymentMethod === 'PLIN'">
+
+              PLIN
+
+            </button>
+
+          </div>
+
+        </div>
+
+
+        <button type="button" class="btn-registrar-consumo" [disabled]="
+            savingConsumption ||
+            !selectedReservationId ||
+            orderLines.length === 0
+          " (click)="registerConsumption()">
+
+          {{
+          savingConsumption
+          ? 'Registrando...'
+          : 'Registrar consumo'
+          }}
+
+        </button>
+
+      </div>
+
+    </section>
+
+  </div>
+
+</div>
+
+
+<!-- =====================================================
+     MODAL SELECCIÓN DE PRODUCTO
+     ===================================================== -->
+
+<div class="modal-overlay" *ngIf="showSelectProductModal" (click)="showSelectProductModal = false">
+
+  <div class="modal-card" (click)="$event.stopPropagation()">
+
+    <header class="modal-header">
+
+      <h2>
+        Seleccionar producto
+      </h2>
+
+
+      <button type="button" class="btn-modal-close" (click)="showSelectProductModal = false">
+
+        ×
+
+      </button>
+
+    </header>
+
+
+    <div class="modal-products-list">
+
+      <div *ngFor="let prod of products" class="prod-picker-item" (click)="addToOrder(prod)">
+
+        <span class="prod-picker-name">
+          {{ prod.name }}
+        </span>
+
+
+        <span class="prod-picker-price">
+          S/ {{ prod.price | number:'1.2-2' }}
+        </span>
+
+      </div>
+
+
+      <div *ngIf="products.length === 0" class="empty-picker">
+
+        Cargando productos...
+
+      </div>
+
+    </div>
+
+  </div>
+
+</div>
+
+
+<!-- =====================================================
+     VOUCHER
+     ===================================================== -->
+
+<app-voucher-modal [visible]="showVoucherModal" [voucher]="activeVoucher" (closed)="showVoucherModal = false">
+</app-voucher-modal>

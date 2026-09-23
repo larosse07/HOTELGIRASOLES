@@ -1,0 +1,525 @@
+﻿<section class="personal-page">
+
+  <!-- ===================================================== -->
+  <!-- ENCABEZADO                                             -->
+  <!-- ===================================================== -->
+
+  <header class="page-header">
+
+    <div>
+
+      <span class="section-kicker">
+        RECEPCIÓN
+      </span>
+
+      <h1>
+        Gastos del personal
+      </h1>
+
+      <p>
+        Registra un gasto realizado por los trabajadores.
+      </p>
+
+    </div>
+
+  </header>
+
+
+  <!-- ===================================================== -->
+  <!-- MENSAJES                                               -->
+  <!-- ===================================================== -->
+
+  @if (errorMessage) {
+
+  <div class="message message-error">
+    {{ errorMessage }}
+  </div>
+
+  }
+
+  @if (successMessage) {
+
+  <div class="message message-success">
+    {{ successMessage }}
+  </div>
+
+  }
+
+
+  <!-- ===================================================== -->
+  <!-- PASO 1: ELEGIR ORIGEN DEL GASTO                       -->
+  <!-- ===================================================== -->
+
+  @if (expenseMode === '') {
+
+  <section class="expense-choice">
+
+    <div class="expense-choice__header">
+
+      <span class="section-kicker">
+        GASTO DE PERSONAL
+      </span>
+
+      <h2>
+        ¿Cómo se cubre este gasto?
+      </h2>
+
+      <p>
+        Selecciona de dónde saldrá el gasto realizado por el trabajador.
+      </p>
+
+    </div>
+
+
+    <div class="expense-choice__options">
+
+
+      <!-- ================================================= -->
+      <!-- DE BODEGA                                         -->
+      <!-- ================================================= -->
+
+      <button type="button" class="expense-choice-card expense-choice-card--warehouse"
+        (click)="expenseMode = 'PRODUCT'; onExpenseModeChange()">
+
+        <div class="expense-choice-card__icon">
+          📦
+        </div>
+
+        <div class="expense-choice-card__content">
+
+          <span class="expense-choice-card__label">
+            DE BODEGA
+          </span>
+
+          <h3>
+            Producto de bodega
+          </h3>
+
+          <p>
+            El trabajador toma un producto del inventario del hotel.
+          </p>
+
+        </div>
+
+        <span class="expense-choice-card__arrow">
+          →
+        </span>
+
+      </button>
+
+
+      <!-- ================================================= -->
+      <!-- DE CAJA                                           -->
+      <!-- ================================================= -->
+
+      <button type="button" class="expense-choice-card expense-choice-card--cash"
+        (click)="expenseMode = 'CASH'; onExpenseModeChange()">
+
+        <div class="expense-choice-card__icon">
+          💵
+        </div>
+
+        <div class="expense-choice-card__content">
+
+          <span class="expense-choice-card__label">
+            DE CAJA
+          </span>
+
+          <h3>
+            Dinero de caja
+          </h3>
+
+          <p>
+            Se retira dinero directamente de la caja del hotel.
+          </p>
+
+        </div>
+
+        <span class="expense-choice-card__arrow">
+          →
+        </span>
+
+      </button>
+
+    </div>
+
+  </section>
+
+  }
+
+
+  <!-- ===================================================== -->
+  <!-- PASO 2: FORMULARIO                                    -->
+  <!-- ===================================================== -->
+
+  @if (expenseMode !== '') {
+
+  <section class="expense-form-card">
+
+
+    <!-- ================================================= -->
+    <!-- CABECERA                                          -->
+    <!-- ================================================= -->
+
+    <div class="expense-form-card__header">
+
+      <button type="button" class="back-button" (click)="expenseMode = ''; onExpenseModeChange()">
+
+        ← Volver
+
+      </button>
+
+
+      <div>
+
+        <span class="section-kicker">
+          GASTO DE PERSONAL
+        </span>
+
+        <h2>
+
+          @if (expenseMode === 'PRODUCT') {
+          Gasto de bodega
+          } @else {
+          Gasto de caja
+          }
+
+        </h2>
+
+        <p>
+
+          @if (expenseMode === 'PRODUCT') {
+          Registra uno o varios productos utilizados por el trabajador.
+          } @else {
+          Registra el dinero retirado de la caja.
+          }
+
+        </p>
+
+      </div>
+
+    </div>
+
+
+    <!-- ================================================= -->
+    <!-- FORMULARIO                                        -->
+    <!-- ================================================= -->
+
+    <form class="expense-form" (ngSubmit)="registerExpense()">
+
+
+      <!-- ================================================= -->
+      <!-- TRABAJADOR                                        -->
+      <!-- ================================================= -->
+
+      <div class="field">
+
+        <label for="worker">
+          TRABAJADOR
+        </label>
+
+        <input id="worker" type="text" name="worker" [(ngModel)]="workerName" placeholder="Nombre del trabajador"
+          autocomplete="off" />
+
+      </div>
+
+
+      <!-- ================================================= -->
+      <!-- BODEGA                                            -->
+      <!-- ================================================= -->
+
+      @if (expenseMode === 'PRODUCT') {
+
+
+      <!-- ================================================= -->
+      <!-- PRODUCTO + CANTIDAD + AÑADIR                      -->
+      <!-- ================================================= -->
+
+      <div class="add-product-row">
+
+
+        <!-- =============================================== -->
+        <!-- PRODUCTO                                        -->
+        <!-- =============================================== -->
+
+        <div class="field">
+
+          <label for="product">
+            PRODUCTO
+          </label>
+
+          <select id="product" name="product" [(ngModel)]="selectedProductId" (change)="onProductChange()">
+
+            <option [ngValue]="null">
+              Seleccionar producto
+            </option>
+
+            @for (
+            product of products;
+            track product.id
+            ) {
+
+            @if (
+            getAvailableProductStock(product) > 0
+            ) {
+
+            <option [ngValue]="product.id">
+
+              {{ product.name }}
+              — S/ {{ formatMoney(product.price) }}
+              · Stock: {{ getAvailableProductStock(product) }}
+
+            </option>
+
+            }
+
+            }
+
+          </select>
+
+        </div>
+
+
+        <!-- =============================================== -->
+        <!-- CANTIDAD                                        -->
+        <!-- =============================================== -->
+
+        <div class="field">
+
+          <label for="quantity">
+            CANTIDAD
+          </label>
+
+          <input id="quantity" type="number" name="quantity" min="1" step="1" [(ngModel)]="quantity"
+            (input)="onQuantityChange()" />
+
+        </div>
+
+
+        <!-- =============================================== -->
+        <!-- AÑADIR                                          -->
+        <!-- =============================================== -->
+
+        <button type="button" class="add-product-button" (click)="addProduct()" [disabled]="!canAddProduct() || saving">
+
+          + Añadir producto
+
+        </button>
+
+      </div>
+
+
+      <!-- ================================================= -->
+      <!-- CANCELAR SELECCIÓN                                -->
+      <!-- ================================================= -->
+
+      @if (selectedProductId !== null) {
+
+      <div class="product-selection-actions">
+
+        <button type="button" class="cancel-product-button" (click)="cancelProductSelection()" [disabled]="saving">
+
+          Cancelar
+
+        </button>
+
+      </div>
+
+      }
+
+
+      <!-- ================================================= -->
+      <!-- PRODUCTOS AGREGADOS                               -->
+      <!-- ================================================= -->
+
+      @if (addedProducts.length > 0) {
+
+      <div class="added-products">
+
+        @for (
+        item of addedProducts;
+        track item.product.id;
+        let i = $index
+        ) {
+
+        <div class="added-product">
+
+          <div class="added-product__info">
+
+            <span class="added-product__name">
+              {{ item.product.name }}
+            </span>
+
+            <span class="added-product__detail">
+              {{ item.quantity }} ×
+              S/ {{ formatMoney(item.product.price) }}
+            </span>
+
+          </div>
+
+
+          <button type="button" class="remove-product-button" (click)="removeProduct(i)" [disabled]="saving"
+            aria-label="Eliminar producto">
+
+            ×
+
+          </button>
+
+        </div>
+
+        }
+
+      </div>
+
+      }
+
+
+      <!-- ================================================= -->
+      <!-- FORMA DE PAGO                                     -->
+      <!-- ================================================= -->
+
+      <div class="field">
+
+        <label>
+          ¿CÓMO SE PAGA EL PRODUCTO?
+        </label>
+
+        <div class="payment-options">
+
+          <label class="payment-option" [class.selected]="personalProductPayment === 'A_CUENTA'">
+
+            <input type="radio" name="personalProductPayment" value="A_CUENTA" [(ngModel)]="personalProductPayment" />
+
+            <span>
+              A cuenta
+            </span>
+
+          </label>
+
+
+          <label class="payment-option" [class.selected]="personalProductPayment === 'TRABAJADOR'">
+
+            <input type="radio" name="personalProductPayment" value="TRABAJADOR" [(ngModel)]="personalProductPayment" />
+
+            <span>
+              Pagar con mi dinero
+            </span>
+
+          </label>
+
+        </div>
+
+      </div>
+
+
+      <!-- ================================================= -->
+      <!-- TOTAL ÚNICO                                       -->
+      <!-- ================================================= -->
+
+      <div class="total-box">
+
+        <span>
+          Total
+        </span>
+
+        <strong>
+          S/ {{ formatMoney(total) }}
+        </strong>
+
+      </div>
+
+      }
+
+
+      <!-- ================================================= -->
+      <!-- CAJA                                              -->
+      <!-- ================================================= -->
+
+      @if (expenseMode === 'CASH') {
+
+
+      <!-- ================================================= -->
+      <!-- MOTIVO                                            -->
+      <!-- ================================================= -->
+
+      <div class="field">
+
+        <label for="cashReason">
+          MOTIVO *
+        </label>
+
+        <input id="cashReason" type="text" name="cashReason" [(ngModel)]="description"
+          placeholder="¿Para qué fue el gasto?" autocomplete="off" />
+
+      </div>
+
+
+      <!-- ================================================= -->
+      <!-- DINERO TOMADO DE CAJA                             -->
+      <!-- ================================================= -->
+
+      <div class="field">
+
+        <label for="cashAmount">
+          DINERO TOMADO DE CAJA *
+        </label>
+
+        <div class="money-input">
+
+          <span>
+            S/
+          </span>
+
+          <input id="cashAmount" type="number" name="cashAmount" min="0.10" step="0.10" [(ngModel)]="cashAmount"
+            (input)="onCashAmountChange()" placeholder="0.00" />
+
+        </div>
+
+        <small>
+          Ingresa el monto retirado de la caja.
+        </small>
+
+      </div>
+
+
+      <!-- ================================================= -->
+      <!-- TOTAL                                             -->
+      <!-- ================================================= -->
+
+      <div class="total-box">
+
+        <span>
+          Total
+        </span>
+
+        <strong>
+          S/ {{ formatMoney(total) }}
+        </strong>
+
+      </div>
+
+      }
+
+
+      <!-- ================================================= -->
+      <!-- REGISTRAR                                         -->
+      <!-- ================================================= -->
+
+      <button type="submit" class="submit-button" [disabled]="saving">
+
+        @if (saving) {
+        Guardando...
+        } @else {
+        Registrar gasto
+        }
+
+      </button>
+
+
+    </form>
+
+  </section>
+
+  }
+
+</section>

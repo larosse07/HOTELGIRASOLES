@@ -1,0 +1,31 @@
+# Angular / Node
+node_modules/
+dist/
+.angular/
+.cache/
+
+# Spring Boot / Java
+target/
+*.class
+
+# IDE
+.vscode/
+.idea/
+*.iml
+
+# Logs
+*.log
+
+# Sistema
+.DS_Store
+Thumbs.db
+
+# Variables y secretos
+.env
+.env.*
+application-local.properties
+application-local.yml
+
+# PostgreSQL / backups
+*.sql.bak
+*.dump

@@ -1,0 +1,502 @@
+<div class="products-page-layout">
+
+  <!-- =====================================================
+       ALERTAS
+       ===================================================== -->
+
+  <div class="alert alert-error" *ngIf="error">
+
+    ⚠️ {{ error }}
+
+  </div>
+
+
+  <div class="alert alert-success" *ngIf="success">
+
+    ✅ {{ success }}
+
+  </div>
+
+
+  <!-- =====================================================
+       CABECERA
+       ===================================================== -->
+
+  <section class="products-header">
+
+    <div class="products-heading">
+
+      <div>
+
+        <h1 class="page-title">
+          Productos
+        </h1>
+
+        <p class="page-description">
+          Administra los productos e inventario del hotel.
+        </p>
+
+      </div>
+
+      <button type="button" class="btn-primary" (click)="openCreateProduct()">
+
+        + Nuevo producto
+
+      </button>
+
+    </div>
+
+
+    <!-- ===================================================
+         BÚSQUEDA
+         =================================================== -->
+
+    <div class="search-row">
+
+      <div class="search-box">
+
+        <span class="search-icon">
+          🔎
+        </span>
+
+        <input type="text" [(ngModel)]="searchTerm" placeholder="Buscar producto..." autocomplete="off">
+
+        <button *ngIf="searchTerm" type="button" class="btn-clear-search" (click)="searchTerm = ''">
+
+          ×
+
+        </button>
+
+      </div>
+
+      <div class="product-counter">
+
+        {{ filteredProducts.length }}
+        {{ filteredProducts.length === 1 ? 'producto' : 'productos' }}
+
+      </div>
+
+    </div>
+
+  </section>
+
+
+
+  <!-- =====================================================
+       TABLA
+       ===================================================== -->
+
+  <section class="products-table-card">
+
+    <div class="table-header">
+
+      <div>
+
+        <h2>
+          Inventario
+        </h2>
+
+        <span>
+          Productos disponibles para los consumos del hotel
+        </span>
+
+      </div>
+
+    </div>
+
+
+    <div class="products-table-wrap">
+
+      <table class="products-table">
+
+        <thead>
+
+          <tr>
+
+            <th>
+              PRODUCTO
+            </th>
+
+            <th>
+              CATEGORÍA
+            </th>
+
+            <th>
+              PRECIO
+            </th>
+
+            <th>
+              STOCK
+            </th>
+
+            <th>
+              ESTADO
+            </th>
+
+            <th class="text-right">
+              ACCIONES
+            </th>
+
+          </tr>
+
+        </thead>
+
+
+        <tbody>
+
+          <!-- =================================================
+               PRODUCTOS
+               ================================================= -->
+
+          <tr *ngFor="let product of filteredProducts">
+
+            <td>
+
+              <div class="product-main">
+
+                <span class="product-name">
+                  {{ product.name }}
+                </span>
+
+              </div>
+
+            </td>
+
+
+            <td>
+
+              <span class="product-category">
+                {{ getCategory(product) }}
+              </span>
+
+            </td>
+
+
+            <td>
+
+              <span class="product-price">
+                S/ {{ product.price | number:'1.2-2' }}
+              </span>
+
+            </td>
+
+
+            <td>
+
+              <span class="stock-number">
+                {{ product.stock }}
+              </span>
+
+            </td>
+
+
+            <td>
+
+              <span class="stock-status" [ngClass]="getStockClass(product)">
+
+                {{ getStockLabel(product) }}
+
+              </span>
+
+            </td>
+
+
+            <td class="actions-cell">
+
+              <button type="button" class="btn-stock" (click)="openAddStock(product)" title="Agregar stock">
+
+                + Stock
+
+              </button>
+
+
+              <button type="button" class="btn-action btn-edit" (click)="openEditProduct(product)"
+                title="Editar producto">
+
+                ✏️
+
+              </button>
+
+
+              <button type="button" class="btn-action btn-delete" (click)="deleteProduct(product)"
+                title="Eliminar producto">
+
+                🗑️
+
+              </button>
+
+            </td>
+
+          </tr>
+
+
+          <!-- =================================================
+               SIN PRODUCTOS
+               ================================================= -->
+
+          <tr *ngIf="filteredProducts.length === 0">
+
+            <td colspan="6" class="empty-products">
+
+              <div class="empty-icon">
+                📦
+              </div>
+
+              <strong>
+                {{ searchTerm
+                ? 'No se encontraron productos'
+                : 'No hay productos registrados' }}
+              </strong>
+
+              <span>
+                {{ searchTerm
+                ? 'Prueba con otro nombre.'
+                : 'Crea tu primer producto para comenzar.' }}
+              </span>
+
+              <button *ngIf="!searchTerm" type="button" class="btn-primary empty-button" (click)="openCreateProduct()">
+
+                + Crear producto
+
+              </button>
+
+            </td>
+
+          </tr>
+
+        </tbody>
+
+      </table>
+
+    </div>
+
+  </section>
+
+</div>
+
+
+
+<!-- =========================================================
+     MODAL CREAR / EDITAR PRODUCTO
+     ========================================================= -->
+
+<div class="modal-overlay" *ngIf="showProductModal" (click)="closeProductModal()">
+
+  <div class="modal-card" (click)="$event.stopPropagation()">
+
+    <header class="modal-header">
+
+      <div>
+
+        <span class="modal-kicker">
+          INVENTARIO
+        </span>
+
+        <h2>
+          {{ editingProduct
+          ? 'Editar producto'
+          : 'Nuevo producto' }}
+        </h2>
+
+      </div>
+
+      <button type="button" class="btn-modal-close" (click)="closeProductModal()" [disabled]="saving">
+
+        ×
+
+      </button>
+
+    </header>
+
+
+    <div class="modal-body">
+
+      <!-- NOMBRE -->
+
+      <div class="form-group">
+
+        <label>
+          NOMBRE DEL PRODUCTO
+        </label>
+
+        <input type="text" [(ngModel)]="productForm.name" placeholder="Ej. Agua mineral" maxlength="100"
+          [disabled]="saving">
+
+      </div>
+
+
+      <!-- PRECIO -->
+
+      <div class="form-group">
+
+        <label>
+          PRECIO
+        </label>
+
+        <div class="input-prefix">
+
+          <span>
+            S/
+          </span>
+
+          <input type="number" [(ngModel)]="productForm.price" min="0" step="0.10" [disabled]="saving">
+
+        </div>
+
+      </div>
+
+
+      <!-- STOCK -->
+
+      <div class="form-group">
+
+        <label>
+          STOCK INICIAL
+        </label>
+
+        <input type="number" [(ngModel)]="productForm.stock" min="0" step="1" [disabled]="saving">
+
+        <small>
+          {{ editingProduct
+          ? 'El stock actual se puede modificar aquí o mediante + Stock.'
+          : 'Cantidad disponible inicialmente.' }}
+        </small>
+
+      </div>
+
+    </div>
+
+
+    <footer class="modal-footer">
+
+      <button type="button" class="btn-secondary" (click)="closeProductModal()" [disabled]="saving">
+
+        Cancelar
+
+      </button>
+
+      <button type="button" class="btn-primary modal-save" (click)="saveProduct()" [disabled]="saving">
+
+        {{ saving
+        ? 'Guardando...'
+        : editingProduct
+        ? 'Guardar cambios'
+        : 'Crear producto' }}
+
+      </button>
+
+    </footer>
+
+  </div>
+
+</div>
+
+
+
+<!-- =========================================================
+     MODAL AGREGAR STOCK
+     ========================================================= -->
+
+<div class="modal-overlay" *ngIf="showStockModal" (click)="closeStockModal()">
+
+  <div class="modal-card stock-modal-card" (click)="$event.stopPropagation()">
+
+    <header class="modal-header">
+
+      <div>
+
+        <span class="modal-kicker">
+          INVENTARIO
+        </span>
+
+        <h2>
+          Agregar stock
+        </h2>
+
+      </div>
+
+      <button type="button" class="btn-modal-close" (click)="closeStockModal()" [disabled]="saving">
+
+        ×
+
+      </button>
+
+    </header>
+
+
+    <div class="stock-product-summary" *ngIf="selectedProduct">
+
+      <div class="stock-product-icon">
+        📦
+      </div>
+
+      <div>
+
+        <strong>
+          {{ selectedProduct.name }}
+        </strong>
+
+        <span>
+          Stock actual:
+          <b>
+            {{ selectedProduct.stock }}
+          </b>
+        </span>
+
+      </div>
+
+    </div>
+
+
+    <div class="modal-body">
+
+      <div class="form-group">
+
+        <label>
+          CANTIDAD A AGREGAR
+        </label>
+
+        <input type="number" [(ngModel)]="stockQuantity" min="1" step="1" [disabled]="saving" autofocus>
+
+      </div>
+
+
+      <div class="stock-preview">
+
+        <span>
+          Nuevo stock
+        </span>
+
+        <strong>
+          {{
+          (selectedProduct?.stock || 0) +
+          (stockQuantity || 0)
+          }}
+        </strong>
+
+      </div>
+
+    </div>
+
+
+    <footer class="modal-footer">
+
+      <button type="button" class="btn-secondary" (click)="closeStockModal()" [disabled]="saving">
+
+        Cancelar
+
+      </button>
+
+      <button type="button" class="btn-primary modal-save" (click)="confirmAddStock()" [disabled]="saving">
+
+        {{ saving
+        ? 'Actualizando...'
+        : 'Agregar stock' }}
+
+      </button>
+
+    </footer>
+
+  </div>
+
+</div>

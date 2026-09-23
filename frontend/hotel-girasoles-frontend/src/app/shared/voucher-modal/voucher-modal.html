@@ -1,0 +1,528 @@
+<div class="voucher-backdrop" *ngIf="visible && voucher" (click)="close()">
+  <div class="voucher-dialog" (click)="$event.stopPropagation()">
+
+    <!-- BARRA SUPERIOR DE ACCIONES -->
+    <div class="voucher-actions-bar no-print">
+      <div class="dialog-title">
+        <span>COMPROBANTE</span>
+      </div>
+
+      <div class="bar-buttons">
+        <button type="button" class="btn-print" (click)="print()" [disabled]="paying">
+          🖨️ Imprimir
+        </button>
+
+        <button type="button" class="btn-close" (click)="close()" aria-label="Cerrar" [disabled]="paying">
+          ✕
+        </button>
+      </div>
+    </div>
+
+
+    <!-- TICKET DE COMPROBANTE -->
+    <div id="voucher-ticket" class="ticket">
+
+      <header class="ticket-header">
+
+        <div class="hotel-logo-text">🏨</div>
+
+        <h2 class="hotel-title">
+          HOTEL GIRASOLES
+        </h2>
+
+        <span class="ticket-subtitle">
+          {{ isReservationVoucher
+          ? 'VOUCHER DE RESERVA'
+          : 'VOUCHER DE CONSUMO' }}
+        </span>
+
+        <div class="ticket-id" *ngIf="voucher.id">
+          N° 000-{{ voucher.id }}
+        </div>
+
+      </header>
+
+
+      <div class="ticket-divider"></div>
+
+
+      <!-- METADATOS DEL TICKET -->
+      <section class="ticket-meta">
+
+        <div class="meta-row">
+          <span class="meta-label">
+            Habitación:
+          </span>
+
+          <strong class="meta-value room-highlight">
+            Hab. {{ voucher.roomNumber }}
+          </strong>
+        </div>
+
+
+        <div class="meta-row">
+          <span class="meta-label">
+            Cliente:
+          </span>
+
+          <strong class="meta-value">
+            {{ voucher.guestName }}
+          </strong>
+        </div>
+
+
+        <div class="meta-row" *ngIf="voucher.guestDni">
+          <span class="meta-label">
+            DNI:
+          </span>
+
+          <span class="meta-value">
+            {{ voucher.guestDni }}
+          </span>
+        </div>
+
+
+        <!-- INGRESO -->
+        <div class="meta-row">
+          <span class="meta-label">
+            Ingreso:
+          </span>
+
+          <span class="meta-value">
+            {{ voucher.dateTime | date:'dd/MM/yyyy HH:mm' }}
+          </span>
+        </div>
+
+
+        <!-- SALIDA REAL -->
+        <div class="meta-row" *ngIf="isReservationVoucher && voucher.finishedAt">
+
+          <span class="meta-label">
+            Salida:
+          </span>
+
+          <span class="meta-value">
+            {{ voucher.finishedAt | date:'dd/MM/yyyy HH:mm' }}
+          </span>
+
+        </div>
+
+      </section>
+
+
+      <div class="ticket-divider"></div>
+
+
+      <!-- PAGO DE HABITACIÓN (RESERVAS) -->
+      <section class="reservation-room-payment" *ngIf="isReservationVoucher">
+
+        <div class="reservation-section-title">
+          PAGO DE HABITACIÓN
+        </div>
+
+
+        <div class="reservation-room-row">
+
+          <span>
+            Habitación {{ voucher.roomNumber }}
+          </span>
+
+          <strong>
+            S/ {{ voucher.roomPrice | number:'1.2-2' }}
+          </strong>
+
+          <span class="pay-badge" [class.PLIN]="voucher.paymentMethod === 'PLIN'"
+            [class.cash]="voucher.paymentMethod === 'EFECTIVO'">
+
+            {{ voucher.paymentMethod || 'A CUENTA' }}
+
+          </span>
+
+        </div>
+
+
+        <div class="payment-row">
+
+          <span class="pay-label">
+            Estado habitación:
+          </span>
+
+          <strong class="status-badge" [class.paid]="voucher.paymentMethod" [class.unpaid]="!voucher.paymentMethod">
+
+            {{ voucher.paymentMethod
+            ? 'PAGADA'
+            : 'PENDIENTE' }}
+
+          </strong>
+
+        </div>
+
+      </section>
+
+
+      <!-- CONSUMOS AGRUPADOS -->
+      <section class="reservation-consumptions" *ngIf="
+          voucher.consumptionGroups &&
+          voucher.consumptionGroups.length > 0
+        ">
+
+        <div class="reservation-section-title">
+          CONSUMOS
+        </div>
+
+
+        <div class="consumption-payment-group" *ngFor="
+            let group of voucher.consumptionGroups
+          ">
+
+          <div class="consumption-group-header">
+
+            <strong>
+              {{ group.paymentMethod }}
+            </strong>
+
+            <span class="pay-badge" [class.PLIN]="group.paymentMethod === 'PLIN'"
+              [class.cash]="group.paymentMethod === 'EFECTIVO'">
+
+              {{ group.paymentMethod }}
+
+            </span>
+
+          </div>
+
+
+          <div class="items-head">
+
+            <span class="col-desc">
+              DESCRIPCIÓN
+            </span>
+
+            <span class="col-qty">
+              CANT
+            </span>
+
+            <span class="col-price">
+              P.UNIT
+            </span>
+
+            <span class="col-total">
+              TOTAL
+            </span>
+
+          </div>
+
+
+          <div class="consumption-group-items">
+
+            <div class="item-row" *ngFor="let item of group.items">
+
+              <span class="col-desc item-name">
+                {{ item.name }}
+              </span>
+
+              <span class="col-qty">
+                {{ item.quantity }}
+              </span>
+
+              <span class="col-price">
+                S/ {{ item.unitPrice | number:'1.2-2' }}
+              </span>
+
+              <span class="col-total">
+                S/ {{ item.subtotal | number:'1.2-2' }}
+              </span>
+
+            </div>
+
+          </div>
+
+
+          <div class="consumption-group-total">
+
+            <span>
+              TOTAL {{ group.paymentMethod }}:
+            </span>
+
+            <strong>
+              S/ {{ group.total | number:'1.2-2' }}
+            </strong>
+
+          </div>
+
+        </div>
+
+      </section>
+
+
+      <!-- VOUCHER NORMAL DE CONSUMO -->
+      <section class="ticket-items" *ngIf="
+          !isReservationVoucher &&
+          (
+            !voucher.consumptionGroups ||
+            voucher.consumptionGroups.length === 0
+          )
+        ">
+
+        <div class="items-head">
+
+          <span class="col-desc">
+            DESCRIPCIÓN
+          </span>
+
+          <span class="col-qty">
+            CANT
+          </span>
+
+          <span class="col-price">
+            P.UNIT
+          </span>
+
+          <span class="col-total">
+            TOTAL
+          </span>
+
+        </div>
+
+
+        <div class="items-list">
+
+          <div class="item-row" *ngFor="let item of voucher.items">
+
+            <span class="col-desc item-name">
+              {{ item.name }}
+            </span>
+
+            <span class="col-qty">
+              {{ item.quantity }}
+            </span>
+
+            <span class="col-price">
+              S/ {{ item.unitPrice | number:'1.2-2' }}
+            </span>
+
+            <span class="col-total">
+              S/ {{ item.subtotal | number:'1.2-2' }}
+            </span>
+
+          </div>
+
+        </div>
+
+      </section>
+
+
+      <div class="ticket-divider"></div>
+
+
+      <!-- TOTALES -->
+      <section class="ticket-totals">
+
+        <div class="total-row" *ngIf="isReservationVoucher">
+
+          <span>
+            HABITACIÓN:
+          </span>
+
+          <strong>
+            S/ {{ voucher.roomPrice | number:'1.2-2' }}
+          </strong>
+
+        </div>
+
+
+        <div class="total-row" *ngIf="isReservationVoucher">
+
+          <span>
+            CONSUMOS:
+          </span>
+
+          <strong>
+            S/ {{
+            (voucher.total - (voucher.roomPrice || 0))
+            | number:'1.2-2'
+            }}
+          </strong>
+
+        </div>
+
+
+        <div class="total-row subtotal" *ngIf="!isReservationVoucher">
+
+          <span>
+            SUBTOTAL:
+          </span>
+
+          <strong>
+            S/ {{ voucher.subtotal | number:'1.2-2' }}
+          </strong>
+
+        </div>
+
+
+        <div class="total-row grand-total">
+
+          <span>
+            TOTAL:
+          </span>
+
+          <strong>
+            S/ {{ voucher.total | number:'1.2-2' }}
+          </strong>
+
+        </div>
+
+      </section>
+
+
+      <div class="ticket-divider"></div>
+
+
+      <!-- ESTADO GENERAL -->
+      <section class="ticket-payment">
+
+        <div class="payment-row" *ngIf="isReservationVoucher">
+
+          <span class="pay-label">
+            Pago habitación:
+          </span>
+
+          <span class="pay-badge" [class.PLIN]="voucher.paymentMethod === 'PLIN'"
+            [class.cash]="voucher.paymentMethod === 'EFECTIVO'">
+
+            {{ voucher.paymentMethod || 'A CUENTA' }}
+
+          </span>
+
+        </div>
+
+
+        <div class="payment-row">
+
+          <span class="pay-label">
+            Estado:
+          </span>
+
+          <strong class="status-badge" [class.paid]="voucher.paymentStatus === 'PAGADO'"
+            [class.unpaid]="voucher.paymentStatus !== 'PAGADO'">
+
+            {{ voucher.paymentStatus === 'PAGADO'
+            ? 'PAGADO'
+            : 'PENDIENTE' }}
+
+          </strong>
+
+        </div>
+
+      </section>
+
+
+      <footer class="ticket-footer">
+
+        <p>
+          ¡Gracias por su preferencia!
+        </p>
+
+        <small>
+          Hotel Girasoles · Atención las 24 horas
+        </small>
+
+      </footer>
+
+    </div>
+
+
+    <!-- SECCIÓN DE PAGO DE SALDO PENDIENTE -->
+    <section class="voucher-payment-section no-print" *ngIf="voucher.paymentStatus === 'PENDIENTE'">
+
+      <div class="voucher-payment-title">
+
+        <strong>
+          ¿Cómo desea pagar?
+        </strong>
+
+        <span>
+          Seleccione el método de pago
+        </span>
+
+      </div>
+
+
+      <div class="voucher-payment-options">
+
+        <!-- OPCIÓN EFECTIVO -->
+        <button type="button" class="voucher-payment-option voucher-payment-option--cash"
+          [class.active]="selectedPayment === 'EFECTIVO'" [disabled]="paying" (click)="selectPayment('EFECTIVO')">
+
+          <span class="voucher-payment-icon">
+            💵
+          </span>
+
+          <span>
+
+            <strong>
+              EFECTIVO
+            </strong>
+
+            <small>
+              Pago en efectivo
+            </small>
+
+          </span>
+
+        </button>
+
+
+        <!-- OPCIÓN PLIN -->
+        <button type="button" class="voucher-payment-option voucher-payment-option--PLIN"
+          [class.active]="selectedPayment === 'PLIN'" [disabled]="paying" (click)="selectPayment('PLIN')">
+
+          <span class="voucher-payment-icon">
+            💜
+          </span>
+
+          <span>
+
+            <strong>
+              PLIN
+            </strong>
+
+            <small>
+              Pago digital
+            </small>
+
+          </span>
+
+        </button>
+
+      </div>
+
+
+      <!-- BOTÓN PROCESAR PAGO -->
+      <button type="button" class="voucher-pay-button" [disabled]="paying || !selectedPayment" (click)="pay()">
+
+        <span *ngIf="!paying">
+          PAGAR Y RETIRAR
+        </span>
+
+        <span *ngIf="paying">
+          PROCESANDO PAGO...
+        </span>
+
+      </button>
+
+    </section>
+
+
+    <!-- PIE DEL DIÁLOGO -->
+    <div class="dialog-footer no-print">
+
+      <button type="button" class="btn-dismiss" (click)="close()" [disabled]="paying">
+
+        Cerrar comprobante
+
+      </button>
+
+    </div>
+
+  </div>
+</div>

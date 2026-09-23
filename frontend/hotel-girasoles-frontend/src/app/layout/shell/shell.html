@@ -1,0 +1,318 @@
+﻿<div class="app-layout">
+
+  <header class="global-navbar">
+
+    <div class="brand-section" [routerLink]="roomsRoute">
+
+      <div class="brand-icon">
+        🏨
+      </div>
+
+      <div class="brand-texts">
+
+        <h1 class="brand-title">
+          Hotel Recepción
+        </h1>
+
+        <span class="brand-subtitle">
+          Sistema de gestión · {{ currentDateStr }}
+        </span>
+
+      </div>
+
+    </div>
+
+
+    <!-- MENÚ DESKTOP -->
+
+    <nav class="nav-tabs">
+
+      <a [routerLink]="roomsRoute" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }"
+        class="nav-tab">
+
+        <span class="tab-icon">
+          🛏️
+        </span>
+
+        <span>
+          Habitaciones
+        </span>
+
+      </a>
+
+
+      <a routerLink="/reservations" routerLinkActive="active" class="nav-tab">
+
+        <span class="tab-icon">
+          📅
+        </span>
+
+        <span>
+          Reservas
+        </span>
+
+      </a>
+
+
+      @if (isAdmin) {
+
+      <a routerLink="/products" routerLinkActive="active" class="nav-tab">
+
+        <span class="tab-icon">
+          🛒
+        </span>
+
+        <span>
+          Productos
+        </span>
+
+      </a>
+
+      }
+
+
+      <a routerLink="/consumptions" routerLinkActive="active" class="nav-tab">
+
+        <span class="tab-icon">
+          🧾
+        </span>
+
+        <span>
+          Consumos
+        </span>
+
+      </a>
+
+
+      <a routerLink="/personal-expenses" routerLinkActive="active" class="nav-tab">
+
+        <span class="tab-icon">
+          👷
+        </span>
+
+        <span>
+          Gasto de Personal
+        </span>
+
+      </a>
+
+
+      <a routerLink="/cash" routerLinkActive="active" class="nav-tab">
+
+        <span class="tab-icon">
+          💰
+        </span>
+
+        <span>
+          Caja
+        </span>
+
+      </a>
+
+    </nav>
+
+
+    <!-- PERFIL DESKTOP -->
+
+    <div class="user-profile">
+
+      <div class="avatar-circle">
+        {{ isAdmin ? 'A' : 'R' }}
+      </div>
+
+      <span class="user-role">
+        {{ userRole }}
+      </span>
+
+      <button type="button" class="logout-button" (click)="logout()" title="Cerrar sesión">
+
+        Salir
+
+      </button>
+
+    </div>
+
+
+    <!-- BOTÓN HAMBURGUESA -->
+
+    <button type="button" class="mobile-menu-button" [class.open]="mobileMenuOpen" (click)="toggleMobileMenu()"
+      [attr.aria-label]="mobileMenuOpen ? 'Cerrar menú' : 'Abrir menú'">
+
+      @if (mobileMenuOpen) {
+      ✕
+      } @else {
+      ☰
+      }
+
+    </button>
+
+
+  </header>
+
+
+  <!-- FONDO DEL MENÚ MÓVIL -->
+
+  @if (mobileMenuOpen) {
+
+  <div class="mobile-menu-overlay" (click)="closeMobileMenu()">
+  </div>
+
+
+  <!-- MENÚ LATERAL -->
+
+  <aside class="mobile-menu">
+
+    <div class="mobile-menu-header">
+
+      <div class="mobile-menu-brand">
+
+        <div class="mobile-menu-brand-icon">
+          🏨
+        </div>
+
+        <div>
+
+          <span class="mobile-menu-kicker">
+            HOTEL GIRASOLES
+          </span>
+
+          <strong>
+            Menú principal
+          </strong>
+
+        </div>
+
+      </div>
+
+    </div>
+
+
+    <!-- OPCIONES -->
+
+    <nav class="mobile-nav-tabs">
+
+      <a [routerLink]="roomsRoute" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }"
+        class="mobile-nav-tab" (click)="closeMobileMenu()">
+
+        <span class="mobile-tab-icon">
+          🛏️
+        </span>
+
+        <span>
+          Habitaciones
+        </span>
+
+      </a>
+
+
+      <a routerLink="/reservations" routerLinkActive="active" class="mobile-nav-tab" (click)="closeMobileMenu()">
+
+        <span class="mobile-tab-icon">
+          📅
+        </span>
+
+        <span>
+          Reservas
+        </span>
+
+      </a>
+
+
+      <a routerLink="/consumptions" routerLinkActive="active" class="mobile-nav-tab" (click)="closeMobileMenu()">
+
+        <span class="mobile-tab-icon">
+          🧾
+        </span>
+
+        <span>
+          Consumos
+        </span>
+
+      </a>
+
+
+      <a routerLink="/personal-expenses" routerLinkActive="active" class="mobile-nav-tab" (click)="closeMobileMenu()">
+
+        <span class="mobile-tab-icon">
+          👷
+        </span>
+
+        <span>
+          Gasto de Personal
+        </span>
+
+      </a>
+
+
+      <a routerLink="/cash" routerLinkActive="active" class="mobile-nav-tab" (click)="closeMobileMenu()">
+
+        <span class="mobile-tab-icon">
+          💰
+        </span>
+
+        <span>
+          Caja
+        </span>
+
+      </a>
+
+
+      @if (isAdmin) {
+
+      <a routerLink="/products" routerLinkActive="active" class="mobile-nav-tab" (click)="closeMobileMenu()">
+
+        <span class="mobile-tab-icon">
+          🛒
+        </span>
+
+        <span>
+          Productos
+        </span>
+
+      </a>
+
+      }
+
+    </nav>
+
+
+    <!-- USUARIO -->
+
+    <div class="mobile-user">
+
+      <div class="avatar-circle">
+        {{ isAdmin ? 'A' : 'R' }}
+      </div>
+
+      <div class="mobile-user-info">
+
+        <strong>
+          {{ userRole }}
+        </strong>
+
+        <span>
+          Sesión activa
+        </span>
+
+      </div>
+
+      <button type="button" class="mobile-logout-button" (click)="logout()">
+
+        Salir
+
+      </button>
+
+    </div>
+
+  </aside>
+
+  }
+
+
+  <main class="page-container">
+
+    <router-outlet></router-outlet>
+
+  </main>
+
+</div>
