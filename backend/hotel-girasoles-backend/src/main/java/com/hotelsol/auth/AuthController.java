@@ -7,71 +7,67 @@ import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/auth")
-@CrossOrigin(origins = "http://localhost:4200")
+@CrossOrigin(origins = {
+                "http://localhost:4200",
+                "https://hotelgirasoles.rousromani-07.workers.dev"
+})
 public class AuthController {
 
-    private final UserRepository userRepository;
-    private final PasswordEncoder passwordEncoder;
-    private final JwtService jwtService;
+        private final UserRepository userRepository;
+        private final PasswordEncoder passwordEncoder;
+        private final JwtService jwtService;
 
-    public AuthController(
-            UserRepository userRepository,
-            PasswordEncoder passwordEncoder,
-            JwtService jwtService
-    ) {
-        this.userRepository = userRepository;
-        this.passwordEncoder = passwordEncoder;
-        this.jwtService = jwtService;
-    }
-
-    @PostMapping("/login")
-    public ResponseEntity<?> login(
-            @RequestBody LoginRequest request
-    ) {
-
-        if (request.getUsername() == null ||
-                request.getPassword() == null) {
-
-            return ResponseEntity
-                    .badRequest()
-                    .body("Usuario y contraseña son obligatorios.");
+        public AuthController(
+                        UserRepository userRepository,
+                        PasswordEncoder passwordEncoder,
+                        JwtService jwtService) {
+                this.userRepository = userRepository;
+                this.passwordEncoder = passwordEncoder;
+                this.jwtService = jwtService;
         }
 
-        User user = userRepository
-                .findByUsername(request.getUsername().trim())
-                .orElse(null);
+        @PostMapping("/login")
+        public ResponseEntity<?> login(
+                        @RequestBody LoginRequest request) {
 
-        if (user == null ||
-                !passwordEncoder.matches(
-                        request.getPassword(),
-                        user.getPassword()
-                )) {
+                if (request.getUsername() == null ||
+                                request.getPassword() == null) {
 
-            return ResponseEntity
-                    .status(HttpStatus.UNAUTHORIZED)
-                    .body("Usuario o contraseña incorrectos.");
+                        return ResponseEntity
+                                        .badRequest()
+                                        .body("Usuario y contraseña son obligatorios.");
+                }
+
+                User user = userRepository
+                                .findByUsername(request.getUsername().trim())
+                                .orElse(null);
+
+                if (user == null ||
+                                !passwordEncoder.matches(
+                                                request.getPassword(),
+                                                user.getPassword())) {
+
+                        return ResponseEntity
+                                        .status(HttpStatus.UNAUTHORIZED)
+                                        .body("Usuario o contraseña incorrectos.");
+                }
+
+                String token = jwtService.generateToken(user);
+
+                return ResponseEntity.ok(
+                                new LoginResponse(
+                                                token,
+                                                user.getUsername(),
+                                                user.getRole().name()));
         }
 
-        String token = jwtService.generateToken(user);
+        @PostMapping("/reception")
+        public ResponseEntity<LoginResponse> reception() {
 
-        return ResponseEntity.ok(
-                new LoginResponse(
-                        token,
-                        user.getUsername(),
-                        user.getRole().name()
-                )
-        );
-    }
-
-    @PostMapping("/reception")
-    public ResponseEntity<LoginResponse> reception() {
-
-        return ResponseEntity.ok(
-                new LoginResponse(
-                        "RECEPTION_ACCESS",
-                        "Recepción",
-                        "RECEPCION"
-                )
-        );
-    }
+                return ResponseEntity.ok(
+                                new LoginResponse(
+                                                "RECEPTION_ACCESS",
+                                                "Recepción",
+                                                "RECEPCION"));
+        }
 }
