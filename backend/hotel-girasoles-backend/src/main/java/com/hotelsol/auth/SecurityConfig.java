@@ -35,8 +35,8 @@ public class SecurityConfig {
         /**
          * CORS
          *
-         * Permite que Angular (localhost:4200)
-         * pueda comunicarse con Spring Boot (localhost:8080).
+         * Permite que Angular local y el frontend publicado
+         * puedan comunicarse con Spring Boot.
          */
         @Bean
         public CorsConfigurationSource corsConfigurationSource() {
@@ -44,7 +44,9 @@ public class SecurityConfig {
                 CorsConfiguration configuration = new CorsConfiguration();
 
                 configuration.setAllowedOrigins(
-                                List.of("http://localhost:4200"));
+                                List.of(
+                                                "http://localhost:4200",
+                                                "https://hotelgirasoles.rousromani-07.workers.dev"));
 
                 configuration.setAllowedMethods(
                                 List.of(
@@ -113,11 +115,6 @@ public class SecurityConfig {
                                                 // PRODUCTOS - CONSULTA
                                                 //
                                                 // ADMIN + RECEPCIÓN
-                                                //
-                                                // Esto permite que recepción vea:
-                                                // - productos
-                                                // - precios
-                                                // - stock actualizado
                                                 // =====================================
                                                 .requestMatchers(
                                                                 HttpMethod.GET,
@@ -127,9 +124,6 @@ public class SecurityConfig {
 
                                                 // =====================================
                                                 // CONSUMO PERSONAL
-                                                //
-                                                // Recepción puede disminuir stock
-                                                // cuando un trabajador toma un producto.
                                                 // =====================================
                                                 .requestMatchers(
                                                                 HttpMethod.PATCH,
@@ -138,11 +132,6 @@ public class SecurityConfig {
 
                                                 // =====================================
                                                 // HABITACIONES - CONSULTA
-                                                //
-                                                // ADMIN + RECEPCIÓN
-                                                //
-                                                // Recepción necesita leer habitaciones
-                                                // para crear reservas y ver el estado.
                                                 // =====================================
                                                 .requestMatchers(
                                                                 HttpMethod.GET,
@@ -152,9 +141,6 @@ public class SecurityConfig {
 
                                                 // =====================================
                                                 // HABITACIONES - CAMBIO DE ESTADO
-                                                //
-                                                // Recepción cambia el estado operativo:
-                                                // OCUPADA, LIMPIEZA, DISPONIBLE
                                                 // =====================================
                                                 .requestMatchers(
                                                                 HttpMethod.PATCH,
@@ -211,9 +197,6 @@ public class SecurityConfig {
                                                 // =====================================
                                                 // AUMENTAR STOCK
                                                 // SOLO ADMIN
-                                                //
-                                                // PATCH:
-                                                // /api/products/{id}/stock
                                                 // =====================================
                                                 .requestMatchers(
                                                                 HttpMethod.PATCH,
