@@ -46,10 +46,10 @@ public class SecurityConfig {
 
                 CorsConfiguration configuration = new CorsConfiguration();
 
-                configuration.setAllowedOrigins(
+                configuration.setAllowedOriginPatterns(
                                 List.of(
                                                 "http://localhost:4200",
-                                                "https://hotelgirasoles.rousromani-07.workers.dev"));
+                                                "https://*.rousromani-07.workers.dev"));
 
                 configuration.setAllowedMethods(
                                 List.of(
