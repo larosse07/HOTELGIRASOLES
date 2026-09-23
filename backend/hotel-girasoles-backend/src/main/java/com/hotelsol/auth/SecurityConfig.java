@@ -1,8 +1,10 @@
 package com.hotelsol.auth;
 
 import org.springframework.boot.CommandLineRunner;
+import org.springframework.boot.web.servlet.FilterRegistrationBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.core.Ordered;
 import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
@@ -10,10 +12,10 @@ import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
-import org.springframework.web.cors.CorsConfiguration;
-import org.springframework.web.cors.CorsConfigurationSource;
-import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.web.cors.CorsConfiguration;
+import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
+import org.springframework.web.filter.CorsFilter;
 
 import java.util.List;
 
@@ -33,13 +35,14 @@ public class SecurityConfig {
         }
 
         /**
-         * CORS
+         * CORS global.
          *
-         * Permite que Angular local y el frontend publicado
-         * puedan comunicarse con Spring Boot.
+         * Se registra como filtro externo con prioridad maxima
+         * para que el preflight OPTIONS sea atendido antes
+         * de Spring Security.
          */
         @Bean
-        public CorsConfigurationSource corsConfigurationSource() {
+        public FilterRegistrationBean<CorsFilter> corsFilter() {
 
                 CorsConfiguration configuration = new CorsConfiguration();
 
@@ -60,15 +63,22 @@ public class SecurityConfig {
                 configuration.setAllowedHeaders(
                                 List.of("*"));
 
-                configuration.setAllowCredentials(true);
+                configuration.setAllowCredentials(false);
 
-                UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+                UrlBasedCorsConfigurationSource source =
+                                new UrlBasedCorsConfigurationSource();
 
                 source.registerCorsConfiguration(
                                 "/**",
                                 configuration);
 
-                return source;
+                FilterRegistrationBean<CorsFilter> registration =
+                                new FilterRegistrationBean<>(
+                                                new CorsFilter(source));
+
+                registration.setOrder(Ordered.HIGHEST_PRECEDENCE);
+
+                return registration;
         }
 
         @Bean
@@ -84,8 +94,7 @@ public class SecurityConfig {
                                 // =====================================
                                 // CORS
                                 // =====================================
-                                .cors(cors -> cors.configurationSource(
-                                                corsConfigurationSource()))
+                                .cors(cors -> cors.disable())
 
                                 // =====================================
                                 // API REST SIN SESIÓN
@@ -113,8 +122,6 @@ public class SecurityConfig {
 
                                                 // =====================================
                                                 // PRODUCTOS - CONSULTA
-                                                //
-                                                // ADMIN + RECEPCIÓN
                                                 // =====================================
                                                 .requestMatchers(
                                                                 HttpMethod.GET,
@@ -218,8 +225,7 @@ public class SecurityConfig {
                                                 .anyRequest()
                                                 .permitAll());
 
-                // Registrar el filtro JWT antes del filtro de autenticacion
-                // estandar de Spring Security
+                // Filtro JWT
                 http.addFilterBefore(
                                 jwtAuthenticationFilter,
                                 UsernamePasswordAuthenticationFilter.class);
