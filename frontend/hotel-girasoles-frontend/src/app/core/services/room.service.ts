@@ -14,7 +14,7 @@ export class RoomService {
   private readonly http = inject(HttpClient);
 
   private readonly apiUrl =
-    'http://localhost:8080/api/rooms';
+    'https://hotelgirasoles-backend.onrender.com/api/rooms';
 
   getAll(): Observable<Room[]> {
     return this.http.get<Room[]>(this.apiUrl);
@@ -66,3 +66,4 @@ export class RoomService {
     );
   }
 }
+

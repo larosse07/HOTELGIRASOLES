@@ -13,7 +13,7 @@ export class CashService {
   private readonly http = inject(HttpClient);
 
   private readonly apiUrl =
-    'http://localhost:8080/api/cash';
+    'https://hotelgirasoles-backend.onrender.com/api/cash';
 
   getAll(): Observable<CashMovement[]> {
     return this.http.get<CashMovement[]>(
@@ -35,3 +35,4 @@ export class CashService {
     );
   }
 }
+

@@ -15,7 +15,7 @@ export class ConsumptionService {
   private readonly http = inject(HttpClient);
 
   private readonly apiUrl =
-    'http://localhost:8080/api/consumptions';
+    'https://hotelgirasoles-backend.onrender.com/api/consumptions';
 
   getAll(): Observable<Consumption[]> {
     return this.http.get<Consumption[]>(
@@ -61,3 +61,4 @@ export class ConsumptionService {
     );
   }
 }
+

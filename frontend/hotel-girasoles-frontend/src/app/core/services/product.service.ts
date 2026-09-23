@@ -12,7 +12,7 @@ export class ProductService {
   private readonly http = inject(HttpClient);
 
   private readonly apiUrl =
-    'http://localhost:8080/api/products';
+    'https://hotelgirasoles-backend.onrender.com/api/products';
 
 
   getAll(): Observable<Product[]> {

@@ -14,7 +14,7 @@ interface LoginResponse {
 export class AuthService {
 
   private readonly http = inject(HttpClient);
-  private readonly apiUrl = 'http://localhost:8080/api/auth';
+  private readonly apiUrl = 'https://hotelgirasoles-backend.onrender.com/api/auth';
 
   login(username: string, password: string): Observable<LoginResponse> {
     return this.http.post<LoginResponse>(
@@ -68,3 +68,4 @@ export class AuthService {
     localStorage.removeItem('hotel_role');
   }
 }
+
