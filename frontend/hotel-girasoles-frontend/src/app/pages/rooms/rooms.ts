@@ -1,3 +1,4 @@
+
 import {
   Component,
   OnInit,
@@ -735,7 +736,7 @@ export class RoomsComponent implements OnInit {
       );
 
     this.router.navigate(
-      ['/products'],
+      ['/consumptions'],
       {
         queryParams: {
 

@@ -1,4 +1,3 @@
-
 import {
   ChangeDetectorRef,
   Component,
@@ -9,9 +8,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import {
   catchError,
-  forkJoin,
-  map,
-  Observable
+  forkJoin
 } from 'rxjs';
 
 import {
@@ -104,9 +101,8 @@ interface PersonalExpenseDetail {
 export class CashComponent implements OnInit {
   isAdmin = false;
 
-  private readonly authService = inject(AuthService);
-
-
+  private readonly authService =
+    inject(AuthService);
 
   private readonly cashService =
     inject(CashService);
@@ -123,10 +119,6 @@ export class CashComponent implements OnInit {
   private readonly cdr =
     inject(ChangeDetectorRef);
 
-  // =========================================================
-  // FECHA Y FILTROS
-  // =========================================================
-
   timeFilter: TimeFilter = 'HOY';
 
   movementFilter: MovementFilter =
@@ -137,35 +129,19 @@ export class CashComponent implements OnInit {
 
   todayDateDisplay = '';
 
-  // =========================================================
-  // DATOS BACKEND
-  // =========================================================
-
   movements: CashMovement[] = [];
 
   reservations: Reservation[] = [];
 
   consumptions: Consumption[] = [];
 
-  // =========================================================
-  // DATOS LOCALES
-  // =========================================================
-
   shifts: CashShift[] = [];
 
   expenses: CashExpense[] = [];
 
-  // =========================================================
-  // LIBRO
-  // =========================================================
-
   bookRows: CashBookRow[] = [];
 
   filteredRows: CashBookRow[] = [];
-
-  // =========================================================
-  // TOTALES DE CAJA
-  // =========================================================
 
   totalEfectivo = 0;
 
@@ -182,10 +158,6 @@ export class CashComponent implements OnInit {
   initialBalance = 0;
 
   finalCash = 0;
-
-  // =========================================================
-  // GASTOS DE PERSONAL
-  // =========================================================
 
   personalExpenses: CashExpense[] = [];
 
@@ -205,17 +177,9 @@ export class CashComponent implements OnInit {
 
   personalStockUnits = 0;
 
-  // =========================================================
-  // GASTOS NORMALES
-  // =========================================================
-
   normalExpenses: CashExpense[] = [];
 
   totalNormalExpenses = 0;
-
-  // =========================================================
-  // TURNOS
-  // =========================================================
 
   currentShift: CashShift | null = null;
 
@@ -230,10 +194,6 @@ export class CashComponent implements OnInit {
   difference = 0;
 
   handoffPersonName = '';
-
-  // =========================================================
-  // MODALES
-  // =========================================================
 
   showOpenShiftModal = false;
 
@@ -253,17 +213,9 @@ export class CashComponent implements OnInit {
   selectedPersonalExpense:
     PersonalExpenseDetail | null = null;
 
-  // =========================================================
-  // EGRESO NORMAL
-  // =========================================================
-
   expenseAmount = 0;
 
   expenseDescription = '';
-
-  // =========================================================
-  // ESTADOS
-  // =========================================================
 
   loading = false;
 
@@ -271,26 +223,20 @@ export class CashComponent implements OnInit {
 
   successMessage = '';
 
-  // =========================================================
-  // LOCAL STORAGE
-  // =========================================================
-
   private readonly CASH_FILTER_STORAGE_KEY =
     'hotelgr_cash_time_filter';
 
   private readonly CASH_DATE_STORAGE_KEY =
     'hotelgr_cash_selected_date';
 
-  // =========================================================
-  // INICIO
-  // =========================================================
-
   ngOnInit(): void {
+
 
     this.isAdmin =
       this.authService.isAdmin();
 
     this.restoreCashViewState();
+
     this.todayDateDisplay =
       this.formatLongDate(
         this.selectedDate
@@ -300,47 +246,40 @@ export class CashComponent implements OnInit {
       this.timeFilter ===
       'ESTE_MES'
     ) {
+
       this.loadCurrentMonth();
+
       return;
     }
 
     this.load();
+
+
   }
 
-  // =========================================================
-  // FECHAS
-  // =========================================================
-
   private getLocalDate(): string {
+
 
     const now =
       new Date();
 
-    const year =
-      now.getFullYear();
+    return new Intl.DateTimeFormat(
+      'en-CA',
+      {
+        timeZone: 'America/Lima',
+        year: 'numeric',
+        month: '2-digit',
+        day: '2-digit'
+      }
+    ).format(now);
 
-    const month =
-      String(
-        now.getMonth() + 1
-      ).padStart(
-        2,
-        '0'
-      );
 
-    const day =
-      String(
-        now.getDate()
-      ).padStart(
-        2,
-        '0'
-      );
-
-    return `${year}-${month}-${day}`;
   }
 
   private dateFromString(
     value: string
   ): Date {
+
 
     const [
       year,
@@ -356,11 +295,14 @@ export class CashComponent implements OnInit {
       month - 1,
       day
     );
+
+
   }
 
   formatLongDate(
     date: string
   ): string {
+
 
     const value =
       this.dateFromString(
@@ -376,11 +318,14 @@ export class CashComponent implements OnInit {
         year: 'numeric'
       }
     );
+
+
   }
 
   formatDateTime(
     value?: string
   ): string {
+
 
     if (!value) {
       return '—';
@@ -400,6 +345,7 @@ export class CashComponent implements OnInit {
     return date.toLocaleString(
       'es-PE',
       {
+        timeZone: 'America/Lima',
         day: '2-digit',
         month: '2-digit',
         year: 'numeric',
@@ -407,11 +353,14 @@ export class CashComponent implements OnInit {
         minute: '2-digit'
       }
     );
+
+
   }
 
   formatTime(
     value?: string
   ): string {
+
 
     if (!value) {
       return '—';
@@ -431,17 +380,17 @@ export class CashComponent implements OnInit {
     return date.toLocaleTimeString(
       'es-PE',
       {
+        timeZone: 'America/Lima',
         hour: '2-digit',
         minute: '2-digit'
       }
     );
+
+
   }
 
-  // =========================================================
-  // CAMBIO DE PERIODO
-  // =========================================================
-
   setToday(): void {
+
 
     this.timeFilter =
       'HOY';
@@ -457,12 +406,17 @@ export class CashComponent implements OnInit {
     this.saveCashViewState();
 
     this.load();
+
+
   }
 
   setYesterday(): void {
 
+
     const date =
-      new Date();
+      this.dateFromString(
+        this.getLocalDate()
+      );
 
     date.setDate(
       date.getDate() - 1
@@ -484,9 +438,12 @@ export class CashComponent implements OnInit {
     this.saveCashViewState();
 
     this.load();
+
+
   }
 
   private resetDisplayedTotals(): void {
+
 
     this.totalEfectivo = 0;
 
@@ -505,9 +462,12 @@ export class CashComponent implements OnInit {
     this.finalCash = 0;
 
     this.cdr.detectChanges();
+
+
   }
 
   setCurrentMonth(): void {
+
 
     this.timeFilter =
       'ESTE_MES';
@@ -515,9 +475,12 @@ export class CashComponent implements OnInit {
     this.saveCashViewState();
 
     this.loadCurrentMonth();
+
+
   }
 
   onDateChange(): void {
+
 
     if (!this.selectedDate) {
       return;
@@ -537,11 +500,14 @@ export class CashComponent implements OnInit {
     this.saveCashViewState();
 
     this.load();
+
+
   }
 
   private toDateInput(
     date: Date
   ): string {
+
 
     const year =
       date.getFullYear();
@@ -563,55 +529,194 @@ export class CashComponent implements OnInit {
       );
 
     return `${year}-${month}-${day}`;
+
+
   }
 
-  // =========================================================
-  // CARGAR MOVIMIENTOS DE CAJA
-  // =========================================================
+  private getMovementDisplayDate(
+    movement: CashMovement
+  ): string {
 
-  private loadMovementsForDate(
+    if (
+      movement.movementType ===
+      'RESERVA'
+    ) {
+
+      const reservation =
+        this.reservations.find(
+          item =>
+            Number(item.id) ===
+            Number(movement.referenceId)
+        );
+
+      if (
+        reservation?.checkIn
+      ) {
+
+        return reservation.checkIn;
+      }
+    }
+
+    if (
+      movement.movementType ===
+      'CONSUMO'
+    ) {
+
+      const consumption =
+        this.consumptions.find(
+          item =>
+            Number(item.id) ===
+            Number(movement.referenceId)
+        );
+
+      if (
+        consumption?.reservation?.id
+      ) {
+
+        const reservation =
+          this.reservations.find(
+            item =>
+              Number(item.id) ===
+              Number(
+                consumption.reservation.id
+              )
+          );
+
+        if (
+          reservation?.checkIn
+        ) {
+
+          return reservation.checkIn;
+        }
+
+        if (
+          consumption.reservation.checkIn
+        ) {
+
+          return consumption.reservation.checkIn;
+        }
+      }
+    }
+
+    return movement.createdAt;
+  }
+
+  private filterMovementsForDate(
+    movements: CashMovement[],
     date: string
-  ): Observable<CashMovement[]> {
+  ): CashMovement[] {
 
-    return this.cashService
-      .getByDate(date)
-      .pipe(
-        catchError(
-          () => {
 
-            return this.cashService
-              .getAll()
-              .pipe(
-                map(
-                  movements =>
-                    movements.filter(
-                      movement =>
-                        this.getDateFromIso(
-                          movement.createdAt
-                        ) === date
-                    )
-                ),
-                catchError(
-                  () => {
+    return movements.filter(
+      movement => {
 
-                    throw new Error(
-                      'No se pudieron cargar los movimientos de Caja.'
-                    );
+        const displayDate =
+          this.getMovementDisplayDate(
+            movement
+          );
 
-                  }
-                )
-              );
+        if (!displayDate) {
+          return false;
+        }
 
-          }
-        )
-      );
+        return (
+          this.getLocalDateFromIso(
+            displayDate
+          ) === date
+        );
+      }
+    );
+
+
   }
 
-  // =========================================================
-  // CARGA PRINCIPAL
-  // =========================================================
+  private filterMovementsForMonth(
+    movements: CashMovement[],
+    date: string
+  ): CashMovement[] {
+
+
+    const selected =
+      this.dateFromString(
+        date
+      );
+
+    const year =
+      selected.getFullYear();
+
+    const month =
+      selected.getMonth();
+
+    return movements.filter(
+      movement => {
+
+        const displayDate =
+          this.getMovementDisplayDate(
+            movement
+          );
+
+        if (!displayDate) {
+          return false;
+        }
+
+        const movementDate =
+          this.dateFromString(
+            this.getLocalDateFromIso(
+              displayDate
+            )
+          );
+
+        return (
+          movementDate.getFullYear() ===
+          year &&
+          movementDate.getMonth() ===
+          month
+        );
+      }
+    );
+
+
+  }
+
+  private getLocalDateFromIso(
+    value: string
+  ): string {
+
+
+    if (!value) {
+      return '';
+    }
+
+    const date =
+      new Date(value);
+
+    if (
+      Number.isNaN(
+        date.getTime()
+      )
+    ) {
+
+      return value.substring(
+        0,
+        10
+      );
+    }
+
+    return new Intl.DateTimeFormat(
+      'en-CA',
+      {
+        timeZone: 'America/Lima',
+        year: 'numeric',
+        month: '2-digit',
+        day: '2-digit'
+      }
+    ).format(date);
+
+
+  }
 
   load(): void {
+
 
     this.loading = true;
 
@@ -624,9 +729,19 @@ export class CashComponent implements OnInit {
     forkJoin({
 
       movements:
-        this.loadMovementsForDate(
-          this.selectedDate
-        ),
+        this.cashService
+          .getAll()
+          .pipe(
+            catchError(
+              () => {
+
+                throw new Error(
+                  'No se pudieron cargar los movimientos de Caja.'
+                );
+
+              }
+            )
+          ),
 
       reservations:
         this.reservationService
@@ -662,14 +777,17 @@ export class CashComponent implements OnInit {
 
       next: data => {
 
-        this.movements =
-          data.movements;
-
         this.reservations =
           data.reservations;
 
         this.consumptions =
           data.consumptions;
+
+        this.movements =
+          this.filterMovementsForDate(
+            data.movements,
+            this.selectedDate
+          );
 
         this.loadLocalCashData();
 
@@ -700,13 +818,12 @@ export class CashComponent implements OnInit {
       }
 
     });
+
+
   }
 
-  // =========================================================
-  // ESTE MES
-  // =========================================================
-
   loadCurrentMonth(): void {
+
 
     this.loading = true;
 
@@ -716,9 +833,6 @@ export class CashComponent implements OnInit {
 
     this.resetDisplayedTotals();
 
-    const currentMonth =
-      this.getLocalDate()
-        .substring(0, 7);
 
     forkJoin({
 
@@ -726,16 +840,6 @@ export class CashComponent implements OnInit {
         this.cashService
           .getAll()
           .pipe(
-            map(
-              movements =>
-                movements.filter(
-                  movement =>
-                    this.getDateFromIso(
-                      movement.createdAt
-                    ).substring(0, 7) ===
-                    currentMonth
-                )
-            ),
             catchError(
               () => {
 
@@ -781,14 +885,17 @@ export class CashComponent implements OnInit {
 
       next: data => {
 
-        this.movements =
-          data.movements;
-
         this.reservations =
           data.reservations;
 
         this.consumptions =
           data.consumptions;
+
+        this.movements =
+          this.filterMovementsForMonth(
+            data.movements,
+            this.getLocalDate()
+          );
 
         this.loadLocalCashDataForMonth();
 
@@ -813,13 +920,12 @@ export class CashComponent implements OnInit {
       }
 
     });
+
+
   }
 
-  // =========================================================
-  // LOCAL STORAGE
-  // =========================================================
-
   private saveCashViewState(): void {
+
 
     localStorage.setItem(
       this.CASH_FILTER_STORAGE_KEY,
@@ -830,9 +936,12 @@ export class CashComponent implements OnInit {
       this.CASH_DATE_STORAGE_KEY,
       this.selectedDate
     );
+
+
   }
 
   private restoreCashViewState(): void {
+
 
     const savedFilter =
       localStorage.getItem(
@@ -853,19 +962,78 @@ export class CashComponent implements OnInit {
 
       this.timeFilter =
         savedFilter;
+
+    } else {
+
+      this.timeFilter =
+        'HOY';
     }
 
     if (
-      savedDate &&
-      /^\d{4}-\d{2}-\d{2}$/.test(savedDate)
+      this.timeFilter ===
+      'HOY'
     ) {
 
       this.selectedDate =
-        savedDate;
+        this.getLocalDate();
+
+      return;
     }
+
+    if (
+      this.timeFilter ===
+      'AYER'
+    ) {
+
+      const yesterday =
+        this.dateFromString(
+          this.getLocalDate()
+        );
+
+      yesterday.setDate(
+        yesterday.getDate() - 1
+      );
+
+      this.selectedDate =
+        this.toDateInput(
+          yesterday
+        );
+
+      return;
+    }
+
+    if (
+      this.timeFilter ===
+      'FECHA'
+    ) {
+
+      if (
+        savedDate &&
+        /^\d{4}-\d{2}-\d{2}$/.test(
+          savedDate
+        )
+      ) {
+
+        this.selectedDate =
+          savedDate;
+
+      } else {
+
+        this.selectedDate =
+          this.getLocalDate();
+      }
+
+      return;
+    }
+
+    this.selectedDate =
+      this.getLocalDate();
+
+
   }
 
   private loadLocalCashData(): void {
+
 
     this.shifts =
       this.shiftService
@@ -920,9 +1088,12 @@ export class CashComponent implements OnInit {
         );
 
     this.calculatePersonalTotals();
+
+
   }
 
   private loadLocalCashDataForMonth(): void {
+
 
     const allExpenses =
       this.shiftService
@@ -999,9 +1170,12 @@ export class CashComponent implements OnInit {
         );
 
     this.calculatePersonalTotals();
+
+
   }
 
   private calculatePersonalTotals(): void {
+
 
     this.totalPersonalExpenses =
       this.personalExpenses.reduce(
@@ -1080,13 +1254,12 @@ export class CashComponent implements OnInit {
           ),
         0
       );
+
+
   }
 
-  // =========================================================
-  // CONSTRUIR LIBRO
-  // =========================================================
-
   private buildBook(): void {
+
 
     const rows: CashBookRow[] = [];
 
@@ -1105,8 +1278,10 @@ export class CashComponent implements OnInit {
     const dayMovements =
       this.movements.filter(
         movement =>
-          this.getDateFromIso(
-            movement.createdAt
+          this.getLocalDateFromIso(
+            this.getMovementDisplayDate(
+              movement
+            )
           ) ===
           this.selectedDate
       );
@@ -1115,10 +1290,6 @@ export class CashComponent implements OnInit {
       [...this.expenses];
 
     let runningBalance = 0;
-
-    // =======================================================
-    // APERTURA
-    // =======================================================
 
     if (
       shifts.length > 0
@@ -1185,45 +1356,105 @@ export class CashComponent implements OnInit {
       row: CashBookRow;
     }> = [];
 
-    // Búsqueda rápida de habitaciones (se arma una sola vez)
     const roomLookup =
       this.buildRoomLookup();
 
-    // =======================================================
-    // RESERVAS Y CONSUMOS
-    // =======================================================
+    const operationGroups =
+      this.buildOperationGroups(
+        dayMovements
+      );
 
     for (
-      const movement of dayMovements
+      const group of operationGroups
     ) {
 
-      const amount =
-        Number(
-          movement.amount || 0
+      const firstMovement =
+        group.movements[0];
+
+      const reservation =
+        group.reservation;
+
+      const hasReservationMovement =
+        group.movements.some(
+          movement =>
+            movement.movementType ===
+            'RESERVA'
+        );
+
+      const hasConsumptionMovement =
+        group.movements.some(
+          movement =>
+            movement.movementType ===
+            'CONSUMO'
+        );
+
+      const room =
+        reservation?.room?.roomNumber ||
+        this.getRoomFromLookup(
+          firstMovement,
+          roomLookup
         );
 
       const cash =
-        movement.paymentMethod ===
-          'EFECTIVO'
-          ? amount
-          : 0;
+        this.roundMoney(
+          group.movements
+            .filter(
+              movement =>
+                movement.paymentMethod ===
+                'EFECTIVO'
+            )
+            .reduce(
+              (
+                total,
+                movement
+              ) =>
+                total +
+                Number(
+                  movement.amount || 0
+                ),
+              0
+            )
+        );
 
       const PLIN =
-        movement.paymentMethod ===
-          'PLIN'
-          ? amount
-          : 0;
-
-      const room =
-        this.getRoomFromLookup(
-          movement,
-          roomLookup
+        this.roundMoney(
+          group.movements
+            .filter(
+              movement =>
+                movement.paymentMethod ===
+                'PLIN'
+            )
+            .reduce(
+              (
+                total,
+                movement
+              ) =>
+                total +
+                Number(
+                  movement.amount || 0
+                ),
+              0
+            )
         );
+
+      const type =
+        hasReservationMovement
+          ? 'RESERVA'
+          : 'CONSUMO';
+
+      let description =
+        hasReservationMovement &&
+          hasConsumptionMovement
+          ? 'Habitación + consumo'
+          : hasReservationMovement
+            ? 'Habitación'
+            : 'Pago de consumo';
 
       events.push({
 
         date:
-          movement.createdAt,
+          reservation?.checkIn ||
+          firstMovement.createdAt,
 
         priority:
           2,
@@ -1231,29 +1462,24 @@ export class CashComponent implements OnInit {
         row: {
 
           id:
-            `movement-${movement.id}`,
+            `operation-${group.reservationId}`,
 
           createdAt:
-            movement.createdAt,
+            reservation?.checkIn ||
+            firstMovement.createdAt,
 
-          type:
-            movement.movementType,
+          type,
 
           room,
 
           reference:
-            this.getMovementReference(
-              movement
-            ),
+            hasReservationMovement
+              ? `RES-${group.reservationId}`
+              : this.getMovementReference(
+                firstMovement
+              ),
 
-          description:
-            movement.description ||
-            (
-              movement.movementType ===
-                'RESERVA'
-                ? 'Pago de reserva'
-                : 'Pago de consumo'
-            ),
+          description,
 
           cash,
 
@@ -1266,18 +1492,15 @@ export class CashComponent implements OnInit {
             true,
 
           referenceId:
-            movement.referenceId,
+            group.reservationId,
 
-          movement
+          movement:
+            firstMovement
 
         }
 
       });
     }
-
-    // =======================================================
-    // GASTOS Y CONSUMOS DE PERSONAL
-    // =======================================================
 
     for (
       const expense of dayExpenses
@@ -1292,10 +1515,6 @@ export class CashComponent implements OnInit {
         undefined &&
         expense.productId !==
         null;
-
-      // -----------------------------------------------------
-      // PERSONAL PAGADO POR TRABAJADOR
-      // -----------------------------------------------------
 
       if (
         isPersonal &&
@@ -1356,10 +1575,6 @@ export class CashComponent implements OnInit {
 
         continue;
       }
-
-      // -----------------------------------------------------
-      // PERSONAL A CUENTA
-      // -----------------------------------------------------
 
       if (
         isPersonal &&
@@ -1423,10 +1638,6 @@ export class CashComponent implements OnInit {
         continue;
       }
 
-      // -----------------------------------------------------
-      // PERSONAL PAGADO DESDE CAJA
-      // -----------------------------------------------------
-
       if (
         isPersonal &&
         expense.cashEffect ===
@@ -1486,10 +1697,6 @@ export class CashComponent implements OnInit {
 
         continue;
       }
-
-      // -----------------------------------------------------
-      // COMPATIBILIDAD CON REGISTROS ANTIGUOS
-      // -----------------------------------------------------
 
       if (
         isPersonal
@@ -1604,10 +1811,6 @@ export class CashComponent implements OnInit {
         continue;
       }
 
-      // -----------------------------------------------------
-      // EGRESO NORMAL
-      // -----------------------------------------------------
-
       events.push({
 
         date:
@@ -1657,10 +1860,6 @@ export class CashComponent implements OnInit {
 
       });
     }
-
-    // =======================================================
-    // CIERRE / ENTREGA
-    // =======================================================
 
     for (
       const shift of shifts
@@ -1722,10 +1921,6 @@ export class CashComponent implements OnInit {
       });
     }
 
-    // =======================================================
-    // ORDENAR (del más antiguo al más nuevo, para el saldo)
-    // =======================================================
-
     events.sort(
       (a, b) => {
 
@@ -1749,10 +1944,6 @@ export class CashComponent implements OnInit {
         );
       }
     );
-
-    // =======================================================
-    // SALDO CORRIDO (en orden cronológico)
-    // =======================================================
 
     for (
       const event of events
@@ -1787,10 +1978,6 @@ export class CashComponent implements OnInit {
         );
     }
 
-    // =======================================================
-    // MOSTRAR: lo más nuevo primero (igual que antes)
-    // =======================================================
-
     for (
       let index =
         events.length - 1;
@@ -1807,88 +1994,131 @@ export class CashComponent implements OnInit {
       rows;
 
     this.applyMovementFilter();
-  }
 
-  // =========================================================
-  // LIBRO MENSUAL
-  // =========================================================
+
+  }
 
   private buildMonthBook(): void {
 
+
     const rows: CashBookRow[] = [];
 
-    const sortedMovements =
-      [...this.movements]
-        .sort(
-          (a, b) =>
-            new Date(
-              b.createdAt
-            ).getTime() -
-            new Date(
-              a.createdAt
-            ).getTime()
-        );
-
-    // Búsqueda rápida de habitaciones (se arma una sola vez)
-    const roomLookup =
-      this.buildRoomLookup();
-
-    // -------------------------------------------------------
-    // HABITACIONES / CONSUMOS
-    // -------------------------------------------------------
+    const operationGroups =
+      this.buildOperationGroups(
+        this.movements
+      );
 
     for (
-      const movement of sortedMovements
+      const group of operationGroups
     ) {
 
-      const room =
-        this.getRoomFromLookup(
-          movement,
-          roomLookup
+      const firstMovement =
+        group.movements[0];
+
+      const reservation =
+        group.reservation;
+
+      const hasReservationMovement =
+        group.movements.some(
+          movement =>
+            movement.movementType ===
+            'RESERVA'
         );
+
+      const hasConsumptionMovement =
+        group.movements.some(
+          movement =>
+            movement.movementType ===
+            'CONSUMO'
+        );
+
+      const room =
+        reservation?.room?.roomNumber ||
+        this.getMovementRoom(
+          firstMovement
+        );
+
+      const cash =
+        this.roundMoney(
+          group.movements
+            .filter(
+              movement =>
+                movement.paymentMethod ===
+                'EFECTIVO'
+            )
+            .reduce(
+              (
+                total,
+                movement
+              ) =>
+                total +
+                Number(
+                  movement.amount || 0
+                ),
+              0
+            )
+        );
+
+      const PLIN =
+        this.roundMoney(
+          group.movements
+            .filter(
+              movement =>
+                movement.paymentMethod ===
+                'PLIN'
+            )
+            .reduce(
+              (
+                total,
+                movement
+              ) =>
+                total +
+                Number(
+                  movement.amount || 0
+                ),
+              0
+            )
+        );
+
+      const type =
+        hasReservationMovement
+          ? 'RESERVA'
+          : 'CONSUMO';
+
+      let description =
+        hasReservationMovement &&
+          hasConsumptionMovement
+          ? 'Habitación + consumo'
+          : hasReservationMovement
+            ? 'Pago de habitación'
+            : 'Pago de consumo';
+
 
       rows.push({
 
         id:
-          `month-${movement.id}`,
+          `month-operation-${group.reservationId}`,
 
         createdAt:
-          movement.createdAt,
+          reservation?.checkIn ||
+          firstMovement.createdAt,
 
-        type:
-          movement.movementType,
+        type,
 
         room,
 
         reference:
-          this.getMovementReference(
-            movement
-          ),
+          hasReservationMovement
+            ? `RES-${group.reservationId}`
+            : this.getMovementReference(
+              firstMovement
+            ),
 
-        description:
-          movement.description ||
-          (
-            movement.movementType ===
-              'RESERVA'
-              ? 'Pago de reserva'
-              : 'Pago de consumo'
-          ),
+        description,
 
-        cash:
-          movement.paymentMethod ===
-            'EFECTIVO'
-            ? Number(
-              movement.amount || 0
-            )
-            : 0,
+        cash,
 
-        PLIN:
-          movement.paymentMethod ===
-            'PLIN'
-            ? Number(
-              movement.amount || 0
-            )
-            : 0,
+        PLIN,
 
         balance:
           0,
@@ -1897,16 +2127,13 @@ export class CashComponent implements OnInit {
           true,
 
         referenceId:
-          movement.referenceId,
+          group.reservationId,
 
-        movement
+        movement:
+          firstMovement
 
       });
     }
-
-    // -------------------------------------------------------
-    // GASTOS DEL MES
-    // -------------------------------------------------------
 
     const monthExpenses =
       [...this.expenses];
@@ -1924,10 +2151,6 @@ export class CashComponent implements OnInit {
         undefined &&
         expense.productId !==
         null;
-
-      // -----------------------------------------------------
-      // PERSONAL PAGADO POR TRABAJADOR
-      // -----------------------------------------------------
 
       if (
         isPersonal &&
@@ -1978,10 +2201,6 @@ export class CashComponent implements OnInit {
 
         continue;
       }
-
-      // -----------------------------------------------------
-      // PERSONAL A CUENTA
-      // -----------------------------------------------------
 
       if (
         isPersonal &&
@@ -2035,10 +2254,6 @@ export class CashComponent implements OnInit {
         continue;
       }
 
-      // -----------------------------------------------------
-      // PERSONAL PAGADO DESDE CAJA
-      // -----------------------------------------------------
-
       if (
         isPersonal &&
         expense.cashEffect ===
@@ -2088,10 +2303,6 @@ export class CashComponent implements OnInit {
 
         continue;
       }
-
-      // -----------------------------------------------------
-      // COMPATIBILIDAD CON REGISTROS ANTIGUOS
-      // -----------------------------------------------------
 
       if (
         isPersonal
@@ -2144,10 +2355,6 @@ export class CashComponent implements OnInit {
         continue;
       }
 
-      // -----------------------------------------------------
-      // EGRESO NORMAL
-      // -----------------------------------------------------
-
       rows.push({
 
         id:
@@ -2188,10 +2395,6 @@ export class CashComponent implements OnInit {
       });
     }
 
-    // =======================================================
-    // ORDENAR TODO EL MES
-    // =======================================================
-
     rows.sort(
       (a, b) =>
         new Date(
@@ -2206,16 +2409,163 @@ export class CashComponent implements OnInit {
       rows;
 
     this.applyMovementFilter();
+
+
   }
 
-  // =========================================================
-  // BÚSQUEDA RÁPIDA DE HABITACIONES
-  // =========================================================
+  private buildOperationGroups(
+    movements: CashMovement[]
+  ): Array<{
+    reservationId: number;
+    reservation?: Reservation;
+    movements: CashMovement[];
+  }> {
+
+
+    const groups =
+      new Map<
+        number,
+        {
+          reservationId: number;
+          reservation?: Reservation;
+          movements: CashMovement[];
+        }
+      >();
+
+    for (
+      const movement of movements
+    ) {
+
+      let reservationId =
+        Number(
+          movement.referenceId
+        );
+
+      let reservation:
+        Reservation | undefined;
+
+      if (
+        movement.movementType ===
+        'RESERVA'
+      ) {
+
+        reservation =
+          this.reservations.find(
+            item =>
+              Number(item.id) ===
+              Number(movement.referenceId)
+          );
+
+      } else {
+
+        const consumption =
+          this.consumptions.find(
+            item =>
+              Number(item.id) ===
+              Number(movement.referenceId)
+          );
+
+        if (
+          consumption?.reservation?.id
+        ) {
+
+          reservationId =
+            Number(
+              consumption.reservation.id
+            );
+
+          reservation =
+            this.reservations.find(
+              item =>
+                Number(item.id) ===
+                reservationId
+            ) ||
+            consumption.reservation;
+        }
+      }
+
+      if (!reservationId) {
+        continue;
+      }
+
+      if (
+        !groups.has(
+          reservationId
+        )
+      ) {
+
+        groups.set(
+          reservationId,
+          {
+            reservationId,
+            reservation,
+            movements: []
+          }
+        );
+
+      } else if (
+        reservation
+      ) {
+
+        const existing =
+          groups.get(
+            reservationId
+          );
+
+        if (
+          existing &&
+          !existing.reservation
+        ) {
+
+          existing.reservation =
+            reservation;
+        }
+      }
+
+      groups
+        .get(
+          reservationId
+        )!
+        .movements
+        .push(
+          movement
+        );
+    }
+
+    return Array.from(
+      groups.values()
+    ).sort(
+      (a, b) => {
+
+        const dateA =
+          a.reservation?.checkIn ||
+          a.movements[0]?.createdAt ||
+          '';
+
+        const dateB =
+          b.reservation?.checkIn ||
+          b.movements[0]?.createdAt ||
+          '';
+
+        return (
+          new Date(
+            dateA
+          ).getTime() -
+          new Date(
+            dateB
+          ).getTime()
+        );
+      }
+    );
+
+
+  }
 
   private buildRoomLookup(): {
     reservation: Map<number, string>;
     consumption: Map<number, string>;
   } {
+
 
     const reservation =
       new Map<number, string>();
@@ -2251,6 +2601,8 @@ export class CashComponent implements OnInit {
       reservation,
       consumption
     };
+
+
   }
 
   private getRoomFromLookup(
@@ -2260,6 +2612,7 @@ export class CashComponent implements OnInit {
       consumption: Map<number, string>;
     }
   ): string {
+
 
     const source =
       movement.movementType ===
@@ -2275,22 +2628,25 @@ export class CashComponent implements OnInit {
       ) ||
       '—'
     );
+
+
   }
-  // =========================================================
-  // FILTROS
-  // =========================================================
 
   setMovementFilter(
     filter: MovementFilter
   ): void {
 
+
     this.movementFilter =
       filter;
 
     this.applyMovementFilter();
+
+
   }
 
   private applyMovementFilter(): void {
+
 
     if (
       this.movementFilter ===
@@ -2362,21 +2718,16 @@ export class CashComponent implements OnInit {
           }
         }
       );
+
+
   }
 
-  // =========================================================
-  // TOTALES
-  // =========================================================
-
   private calculateTotals(): void {
+
 
     this.totalEfectivo = 0;
 
     this.totalPLIN = 0;
-
-    // =======================================================
-    // INGRESOS DE HABITACIONES Y CLIENTES
-    // =======================================================
 
     for (
       const movement of this.movements
@@ -2405,10 +2756,6 @@ export class CashComponent implements OnInit {
       }
     }
 
-    // =======================================================
-    // EGRESOS
-    // =======================================================
-
     this.totalNormalExpenses =
       this.normalExpenses.reduce(
         (
@@ -2435,10 +2782,6 @@ export class CashComponent implements OnInit {
         0
       );
 
-    // =======================================================
-    // INGRESO PERSONAL PAGADO POR TRABAJADOR
-    // =======================================================
-
     this.totalPersonalWorkerExpenses =
       this.personalWorkerExpenses.reduce(
         (
@@ -2452,19 +2795,11 @@ export class CashComponent implements OnInit {
         0
       );
 
-    // =======================================================
-    // A CUENTA NO AFECTA CAJA
-    // =======================================================
-
     this.totalExpenses =
       this.roundMoney(
         this.totalNormalExpenses +
         this.totalPersonalHotelExpenses
       );
-
-    // =======================================================
-    // EFECTIVO REAL RECIBIDO
-    // =======================================================
 
     this.cashCollected =
       this.roundMoney(
@@ -2472,20 +2807,12 @@ export class CashComponent implements OnInit {
         this.totalPersonalWorkerExpenses
       );
 
-    // =======================================================
-    // INGRESOS TOTALES
-    // =======================================================
-
     this.totalGeneral =
       this.roundMoney(
         this.totalEfectivo +
         this.totalPLIN +
         this.totalPersonalWorkerExpenses
       );
-
-    // =======================================================
-    // EFECTIVO ESPERADO
-    // =======================================================
 
     this.expectedCash =
       this.roundMoney(
@@ -2496,9 +2823,12 @@ export class CashComponent implements OnInit {
 
     this.finalCash =
       this.expectedCash;
+
+
   }
 
   private calculateMonthTotals(): void {
+
 
     this.totalEfectivo = 0;
 
@@ -2555,15 +2885,14 @@ export class CashComponent implements OnInit {
     this.expectedCash = 0;
 
     this.finalCash = 0;
-  }
 
-  // =========================================================
-  // RECARGAR LA VISTA ACTUAL (respeta HOY / AYER / FECHA / MES)
-  // =========================================================
+
+  }
 
   private reloadCurrentView(
     successMessage = ''
   ): void {
+
 
     if (
       this.timeFilter ===
@@ -2577,17 +2906,14 @@ export class CashComponent implements OnInit {
       this.load();
     }
 
-    // load() limpia los mensajes al empezar,
-    // por eso el mensaje de éxito se pone después.
     this.successMessage =
       successMessage;
+
+
   }
 
-  // =========================================================
-  // APERTURA
-  // =========================================================
-
   openOpenShiftModal(): void {
+
 
     this.errorMessage = '';
 
@@ -2621,15 +2947,21 @@ export class CashComponent implements OnInit {
 
     this.showOpenShiftModal =
       true;
+
+
   }
 
   closeOpenShiftModal(): void {
 
+
     this.showOpenShiftModal =
       false;
+
+
   }
 
   confirmOpenShift(): void {
+
 
     const name =
       this.openingPersonName
@@ -2701,20 +3033,17 @@ export class CashComponent implements OnInit {
     this.reloadCurrentView(
       `Turno iniciado por ${name}.`
     );
+
+
   }
 
-  // =========================================================
-  // CIERRE DE CAJA
-  // =========================================================
-
   openHandoffModal(): void {
+
 
     this.errorMessage = '';
 
     this.successMessage = '';
 
-    // El cierre calcula el efectivo esperado con los datos que
-    // están en pantalla; en ESTE MES o en otra fecha saldría mal.
     if (
       this.timeFilter ===
       'ESTE_MES' ||
@@ -2754,15 +3083,21 @@ export class CashComponent implements OnInit {
 
     this.showHandoffModal =
       true;
+
+
   }
 
   closeHandoffModal(): void {
 
+
     this.showHandoffModal =
       false;
+
+
   }
 
   onCountedAmountChange(): void {
+
 
     const counted =
       Number(
@@ -2774,9 +3109,12 @@ export class CashComponent implements OnInit {
         counted -
         this.expectedCash
       );
+
+
   }
 
   confirmHandoff(): void {
+
 
     if (
       !this.currentShift
@@ -2827,13 +3165,12 @@ export class CashComponent implements OnInit {
     this.reloadCurrentView(
       message
     );
+
+
   }
 
-  // =========================================================
-  // EGRESO NORMAL
-  // =========================================================
-
   openExpenseModal(): void {
+
 
     this.expenseAmount =
       0;
@@ -2846,15 +3183,21 @@ export class CashComponent implements OnInit {
 
     this.showExpenseModal =
       true;
+
+
   }
 
   closeExpenseModal(): void {
 
+
     this.showExpenseModal =
       false;
+
+
   }
 
   confirmExpense(): void {
+
 
     const amount =
       Number(
@@ -2915,13 +3258,12 @@ export class CashComponent implements OnInit {
     this.reloadCurrentView(
       'Egreso registrado correctamente.'
     );
+
+
   }
 
-  // =========================================================
-  // SALDO
-  // =========================================================
-
   private recalculateExpectedCash(): void {
+
 
     this.calculateTotals();
 
@@ -2945,15 +3287,14 @@ export class CashComponent implements OnInit {
           this.expectedCash
         );
     }
-  }
 
-  // =========================================================
-  // DETALLE DE OPERACIÓN
-  // =========================================================
+
+  }
 
   openOperation(
     row: CashBookRow
   ): void {
+
 
     if (row.expense) {
 
@@ -2975,108 +3316,141 @@ export class CashComponent implements OnInit {
 
     this.loading = true;
 
-    if (
-      row.type ===
-      'RESERVA'
-    ) {
+    const reservationId =
+      this.getReservationIdFromRow(
+        row
+      );
 
-      forkJoin({
+    if (!reservationId) {
 
-        reservation:
-          this.reservationService
-            .getById(
-              row.referenceId
-            ),
-
-        consumptions:
-          this.consumptionService
-            .getByReservation(
-              row.referenceId
-            )
-
-      }).subscribe({
-
-        next: data => {
-
-          this.selectedOperation =
-            this.buildOperationDetail(
-              data.reservation,
-              data.consumptions,
-              'RESERVA'
-            );
-
-          this.showOperationModal =
-            true;
-
-          this.loading = false;
-
-          this.cdr.detectChanges();
-        },
-
-        error: () => {
-
-          this.loading = false;
-
-          this.errorMessage =
-            'No se pudo cargar el detalle de la reserva.';
-        }
-
-      });
+      this.loading = false;
 
       return;
     }
 
-    this.consumptionService
-      .getById(
-        row.referenceId
-      )
-      .subscribe({
+    forkJoin({
 
-        next: consumption => {
+      reservation:
+        this.reservationService
+          .getById(
+            reservationId
+          ),
 
-          this.selectedOperation =
-            this.buildOperationDetail(
-              consumption.reservation,
-              [consumption],
-              'CONSUMO',
-              consumption
-            );
+      consumptions:
+        this.consumptionService
+          .getByReservation(
+            reservationId
+          )
 
-          this.showOperationModal =
-            true;
+    }).subscribe({
 
+      next: data => {
+
+        if (
+          row.type !== 'RESERVA' &&
+          row.type !== 'CONSUMO'
+        ) {
           this.loading = false;
-
-          this.cdr.detectChanges();
-        },
-
-        error: () => {
-
-          this.loading = false;
-
-          this.errorMessage =
-            'No se pudo cargar el detalle del consumo.';
+          return;
         }
 
-      });
+        this.selectedOperation =
+          this.buildOperationDetail(
+            data.reservation,
+            data.consumptions,
+            row.type
+          );
+
+        this.showOperationModal =
+          true;
+
+        this.loading = false;
+
+        this.cdr.detectChanges();
+      },
+
+      error: () => {
+
+        this.loading = false;
+
+        this.errorMessage =
+          'No se pudo cargar el detalle de la operación.';
+
+        this.cdr.detectChanges();
+      }
+
+    });
+
+
+  }
+
+  private getReservationIdFromRow(
+    row: CashBookRow
+  ): number {
+
+
+    if (
+      row.referenceId
+    ) {
+
+      if (
+        row.type ===
+        'RESERVA'
+      ) {
+
+        return Number(
+          row.referenceId
+        );
+      }
+
+      if (
+        row.type ===
+        'CONSUMO'
+      ) {
+
+        const consumption =
+          this.consumptions.find(
+            item =>
+              Number(item.id) ===
+              Number(row.referenceId)
+          );
+
+        if (
+          consumption?.reservation?.id
+        ) {
+
+          return Number(
+            consumption.reservation.id
+          );
+        }
+
+        return Number(
+          row.referenceId
+        );
+      }
+    }
+
+    return 0;
+
+
   }
 
   closeOperationModal(): void {
+
 
     this.showOperationModal =
       false;
 
     this.selectedOperation =
       null;
-  }
 
-  // =========================================================
-  // DETALLE GASTO PERSONAL
-  // =========================================================
+
+  }
 
   openPersonalExpense(
     expense: CashExpense
   ): void {
+
 
     const quantity =
       Number(
@@ -3111,20 +3485,21 @@ export class CashComponent implements OnInit {
       true;
 
     this.cdr.detectChanges();
+
+
   }
 
   closePersonalExpenseModal(): void {
+
 
     this.showPersonalExpenseModal =
       false;
 
     this.selectedPersonalExpense =
       null;
-  }
 
-  // =========================================================
-  // DETALLE DE RESERVA / CONSUMO
-  // =========================================================
+
+  }
 
   private buildOperationDetail(
     reservation: Reservation,
@@ -3135,15 +3510,14 @@ export class CashComponent implements OnInit {
     selectedConsumption?: Consumption
   ): OperationDetail {
 
+
     const selected =
       selectedConsumption;
 
     const totalRoom =
-      type === 'RESERVA'
-        ? Number(
-          reservation.roomPrice || 0
-        )
-        : 0;
+      Number(
+        reservation.roomPrice || 0
+      );
 
     const totalConsumption =
       consumptions.reduce(
@@ -3163,27 +3537,21 @@ export class CashComponent implements OnInit {
     let PLINTotal = 0;
 
     if (
-      type ===
-      'RESERVA'
+      reservation.paymentMethod ===
+      'EFECTIVO'
     ) {
 
-      if (
-        reservation.paymentMethod ===
-        'EFECTIVO'
-      ) {
+      cashTotal +=
+        totalRoom;
+    }
 
-        cashTotal +=
-          totalRoom;
-      }
+    if (
+      reservation.paymentMethod ===
+      'PLIN'
+    ) {
 
-      if (
-        reservation.paymentMethod ===
-        'PLIN'
-      ) {
-
-        PLINTotal +=
-          totalRoom;
-      }
+      PLINTotal +=
+        totalRoom;
     }
 
     for (
@@ -3244,25 +3612,27 @@ export class CashComponent implements OnInit {
       PLINTotal
 
     };
-  }
 
-  // =========================================================
-  // HELPERS
-  // =========================================================
+
+  }
 
   getMovementReference(
     movement: CashMovement
   ): string {
 
+
     return movement.movementType ===
       'RESERVA'
       ? `RES-${movement.referenceId}`
       : `CON-${movement.referenceId}`;
+
+
   }
 
   getMovementRoom(
     movement: CashMovement
   ): string {
+
 
     if (
       movement.movementType ===
@@ -3292,11 +3662,14 @@ export class CashComponent implements OnInit {
         ?.roomNumber ||
       '—'
     );
+
+
   }
 
   getMovementLabel(
     type: string
   ): string {
+
 
     switch (type) {
 
@@ -3321,11 +3694,14 @@ export class CashComponent implements OnInit {
       default:
         return type;
     }
+
+
   }
 
   getPaymentLabel(
     method?: PaymentMethod
   ): string {
+
 
     if (!method) {
       return '—';
@@ -3335,11 +3711,14 @@ export class CashComponent implements OnInit {
       'EFECTIVO'
       ? 'Efectivo'
       : 'PLIN';
+
+
   }
 
   getPersonalPaymentLabel(
     expense: CashExpense
   ): string {
+
 
     if (
       expense.cashEffect ===
@@ -3360,28 +3739,37 @@ export class CashComponent implements OnInit {
     }
 
     return 'Caja del hotel';
+
+
   }
 
   getPersonalExpenseStock(
     expense: CashExpense
   ): number {
 
+
     return Number(
       expense.quantity || 0
     );
+
+
   }
 
   personalExpenseAffectsCash(
     expense: CashExpense
   ): boolean {
 
+
     return expense.cashEffect ===
       'EGRESO';
+
+
   }
 
   getExpenseTypeLabel(
     expense: CashExpense
   ): string {
+
 
     if (
       expense.type ===
@@ -3392,30 +3780,39 @@ export class CashComponent implements OnInit {
     }
 
     return 'Egreso';
+
+
   }
 
   getShiftStatus(
     shift: CashShift
   ): string {
 
+
     return shift.status ===
       'ABIERTO'
       ? 'EN CURSO'
       : 'CERRADO';
+
+
   }
 
   getShiftDifference(
     shift: CashShift
   ): number {
 
+
     return Number(
       shift.difference || 0
     );
+
+
   }
 
   getDifferenceClass(
     difference: number
   ): string {
+
 
     if (
       difference === 0
@@ -3432,17 +3829,23 @@ export class CashComponent implements OnInit {
     }
 
     return 'difference-negative';
+
+
   }
 
   isToday(): boolean {
+
 
     return (
       this.selectedDate ===
       this.getLocalDate()
     );
+
+
   }
 
   get currentShiftExpected(): number {
+
 
     if (
       !this.currentShift
@@ -3452,57 +3855,61 @@ export class CashComponent implements OnInit {
     }
 
     return this.expectedCash;
+
+
   }
 
-  // =========================================================
-  // GETTERS PÚBLICOS PARA HTML
-  // =========================================================
-
   get cashExpenseCount(): number {
+
 
     return (
       this.normalExpenses.length +
       this.personalHotelExpenses.length
     );
+
+
   }
 
   get totalMovementCount(): number {
 
-    return (
-      this.movements.length +
-      this.cashExpenseCount +
-      this.personalWorkerExpenses.length +
-      this.personalAccountExpenses.length
-    );
-  }
 
-  // =========================================================
-  // ABS
-  // =========================================================
+    return (
+      this.bookRows.length
+    );
+
+
+  }
 
   abs(
     value: number
   ): number {
+
 
     return Math.abs(
       Number(
         value || 0
       )
     );
+
+
   }
 
   formatMoney(
     value: number
   ): string {
 
+
     return Number(
       value || 0
     ).toFixed(2);
+
+
   }
 
   private roundMoney(
     value: number
   ): number {
+
 
     return Math.round(
       (
@@ -3510,11 +3917,14 @@ export class CashComponent implements OnInit {
         Number.EPSILON
       ) * 100
     ) / 100;
+
+
   }
 
   private getDateFromIso(
     value: string
   ): string {
+
 
     if (!value) {
       return '';
@@ -3532,28 +3942,39 @@ export class CashComponent implements OnInit {
       return '';
     }
 
-    return this.toDateInput(
-      date
-    );
-  }
+    return new Intl.DateTimeFormat(
+      'en-CA',
+      {
+        timeZone: 'America/Lima',
+        year: 'numeric',
+        month: '2-digit',
+        day: '2-digit'
+      }
+    ).format(date);
 
-  // =========================================================
-  // ESTADO DE CAJA
-  // =========================================================
+
+  }
 
   hasOpenShift(): boolean {
 
+
     return !!this.currentShift;
+
+
   }
 
   isShiftClosed(): boolean {
 
+
     return !!this.currentShift &&
       this.currentShift.status ===
       'ENTREGADO';
+
+
   }
 
   get cashDifference(): number {
+
 
     if (
       !this.currentShift ||
@@ -3572,9 +3993,12 @@ export class CashComponent implements OnInit {
         this.currentShift.expectedCash
       )
     );
+
+
   }
 
   get cashDifferenceLabel(): string {
+
 
     const difference =
       this.cashDifference;
@@ -3594,24 +4018,22 @@ export class CashComponent implements OnInit {
     }
 
     return 'FALTANTE';
+
+
   }
 
-  // =========================================================
-  // MENSAJES
-  // =========================================================
-
   clearMessages(): void {
+
 
     this.errorMessage = '';
 
     this.successMessage = '';
+
+
   }
 
-  // =========================================================
-  // IMPRIMIR CIERRE
-  // =========================================================
-
   printCash(): void {
+
 
     const reportDate =
       this.formatLongDate(
@@ -3622,10 +4044,6 @@ export class CashComponent implements OnInit {
       Number(
         this.initialBalance || 0
       );
-
-    // =======================================================
-    // HABITACIONES
-    // =======================================================
 
     const habitacionesEfectivo =
       this.movements
@@ -3669,10 +4087,6 @@ export class CashComponent implements OnInit {
         habitacionesPLIN
       );
 
-    // =======================================================
-    // CONSUMOS CLIENTES
-    // =======================================================
-
     const consumosEfectivo =
       this.movements
         .filter(
@@ -3715,18 +4129,10 @@ export class CashComponent implements OnInit {
         consumosPLIN
       );
 
-    // =======================================================
-    // PERSONAL QUE PAGA CON SU DINERO
-    // =======================================================
-
     const personalPagadoPorTrabajador =
       this.roundMoney(
         this.totalPersonalWorkerExpenses || 0
       );
-
-    // =======================================================
-    // INGRESOS
-    // =======================================================
 
     const totalEfectivoIngresos =
       this.roundMoney(
@@ -3752,10 +4158,6 @@ export class CashComponent implements OnInit {
         personalPagadoPorTrabajador
       );
 
-    // =======================================================
-    // EGRESOS
-    // =======================================================
-
     const egresoHotel =
       this.roundMoney(
         this.totalNormalExpenses || 0
@@ -3772,18 +4174,10 @@ export class CashComponent implements OnInit {
         egresoPersonal
       );
 
-    // =======================================================
-    // A CUENTA
-    // =======================================================
-
     const totalConsumoPersonalCuenta =
       this.roundMoney(
         this.totalPersonalAccountExpenses || 0
       );
-
-    // =======================================================
-    // EFECTIVO ESPERADO
-    // =======================================================
 
     const efectivoIngresosReales =
       this.roundMoney(
@@ -3797,10 +4191,6 @@ export class CashComponent implements OnInit {
         efectivoIngresosReales -
         totalEgresos
       );
-
-    // =======================================================
-    // EFECTIVO ENCONTRADO
-    // =======================================================
 
     const selectedShift =
       [...this.shifts]
@@ -3841,10 +4231,6 @@ export class CashComponent implements OnInit {
         )
         : null;
 
-    // =======================================================
-    // TURNO
-    // =======================================================
-
     const shiftForReport =
       selectedShift ||
       this.currentShift;
@@ -3872,10 +4258,6 @@ export class CashComponent implements OnInit {
         `${inicio} – ${fin}`;
     }
 
-    // =======================================================
-    // HELPERS
-    // =======================================================
-
     const money =
       (value: number): string =>
         `S/ ${this.formatMoney(value)}`;
@@ -3895,11 +4277,9 @@ export class CashComponent implements OnInit {
             ? 'SOBRANTE'
             : 'FALTANTE';
 
-    // =======================================================
-    // HTML
-    // =======================================================
-
     const html = `
+
+
 <!DOCTYPE html>
 
 <html lang="es">
@@ -4254,379 +4634,385 @@ export class CashComponent implements OnInit {
 
   <div class="document">
 
-    <div class="header">
 
-      <div class="hotel">
-        HOTEL GIRASOLES
-      </div>
+<div class="header">
 
-      <h1>
-        Cierre de Caja
-      </h1>
+  <div class="hotel">
+    HOTEL GIRASOLES
+  </div>
 
-      <div class="turno">
-        Turno ${this.escapeHtml(turnoTexto)}
-      </div>
+  <h1>
+    Cierre de Caja
+  </h1>
 
-      <div class="fecha">
-        ${this.escapeHtml(reportDate)}
-      </div>
+  <div class="turno">
+    Turno ${this.escapeHtml(turnoTexto)}
+  </div>
 
-    </div>
+  <div class="fecha">
+    ${this.escapeHtml(reportDate)}
+  </div>
 
-    <div class="opening">
+</div>
 
-      <span class="opening-label">
-        Caja inicial
-      </span>
+<div class="opening">
 
-      <strong class="opening-value">
-        ${money(cajaInicial)}
-      </strong>
+  <span class="opening-label">
+    Caja inicial
+  </span>
 
-    </div>
+  <strong class="opening-value">
+    ${money(cajaInicial)}
+  </strong>
 
-    <h2>
-      Ingresos del turno
-    </h2>
+</div>
 
-    <table>
+<h2>
+  Ingresos del turno
+</h2>
 
-      <thead>
+<table>
 
-        <tr>
+  <thead>
 
-          <th>
-            Concepto
-          </th>
+    <tr>
 
-          <th>
-            Efectivo
-          </th>
+      <th>
+        Concepto
+      </th>
 
-          <th>
-            PLIN/YAPE
-          </th>
+      <th>
+        Efectivo
+      </th>
 
-        </tr>
+      <th>
+        PLIN/YAPE
+      </th>
 
-      </thead>
+    </tr>
 
-      <tbody>
+  </thead>
 
-        <tr>
+  <tbody>
 
-          <td>
-            Habitaciones
-          </td>
+    <tr>
 
-          <td>
-            ${money(habitacionesEfectivo)}
-          </td>
+      <td>
+        Habitaciones
+      </td>
 
-          <td>
-            ${money(habitacionesPLIN)}
-          </td>
+      <td>
+        ${money(habitacionesEfectivo)}
+      </td>
 
-        </tr>
+      <td>
+        ${money(habitacionesPLIN)}
+      </td>
 
-        <tr>
+    </tr>
 
-          <td>
-            Consumos de clientes
-          </td>
+    <tr>
 
-          <td>
-            ${money(consumosEfectivo)}
-          </td>
+      <td>
+        Consumos de clientes
+      </td>
 
-          <td>
-            ${money(consumosPLIN)}
-          </td>
+      <td>
+        ${money(consumosEfectivo)}
+      </td>
 
-        </tr>
+      <td>
+        ${money(consumosPLIN)}
+      </td>
 
-        <tr>
+    </tr>
 
-          <td>
-            Personal pagado con dinero propio
-          </td>
+    <tr>
 
-          <td>
-            ${money(personalPagadoPorTrabajador)}
-          </td>
+      <td>
+        Personal pagado con dinero propio
+      </td>
 
-          <td>
-            ${money(0)}
-          </td>
+      <td>
+        ${money(personalPagadoPorTrabajador)}
+      </td>
 
-        </tr>
+      <td>
+        ${money(0)}
+      </td>
 
-        <tr class="row-total">
+    </tr>
 
-          <td>
-            TOTAL
-          </td>
+    <tr class="row-total">
 
-          <td>
-            ${money(
+      <td>
+        TOTAL
+      </td>
+
+      <td>
+        ${money(
       this.roundMoney(
         totalEfectivoIngresos +
         personalPagadoPorTrabajador
       )
     )}
-          </td>
+      </td>
 
-          <td>
-            ${money(totalPLINIngresos)}
-          </td>
+      <td>
+        ${money(totalPLINIngresos)}
+      </td>
 
-        </tr>
+    </tr>
 
-      </tbody>
+  </tbody>
 
-    </table>
+</table>
 
-    <div class="totals">
+<div class="totals">
 
-      <div class="total-line">
+  <div class="total-line">
 
-        <span>
-          Ingresos de habitaciones
-        </span>
+    <span>
+      Ingresos de habitaciones
+    </span>
 
-        <strong>
-          ${money(totalHabitaciones)}
-        </strong>
+    <strong>
+      ${money(totalHabitaciones)}
+    </strong>
 
-      </div>
+  </div>
 
-      <div class="total-line">
+  <div class="total-line">
 
-        <span>
-          Consumos de clientes
-        </span>
+    <span>
+      Consumos de clientes
+    </span>
 
-        <strong>
-          ${money(totalConsumosClientes)}
-        </strong>
+    <strong>
+      ${money(totalConsumosClientes)}
+    </strong>
 
-      </div>
+  </div>
 
-      <div class="total-line">
+  <div class="total-line">
 
-        <span>
-          Ingreso de personal
-        </span>
+    <span>
+      Ingreso de personal
+    </span>
 
-        <strong>
-          ${money(personalPagadoPorTrabajador)}
-        </strong>
+    <strong>
+      ${money(personalPagadoPorTrabajador)}
+    </strong>
 
-      </div>
+  </div>
 
-      <div class="total-line main">
+  <div class="total-line main">
 
-        <span>
-          INGRESOS TOTALES
-        </span>
+    <span>
+      INGRESOS TOTALES
+    </span>
 
-        <strong>
-          ${money(totalIngresos)}
-        </strong>
+    <strong>
+      ${money(totalIngresos)}
+    </strong>
 
-      </div>
+  </div>
 
-    </div>
+</div>
 
-    <h2 style="margin-top: 20px;">
+<h2 style="margin-top: 20px;">
+  Egresos de caja
+</h2>
+
+<table>
+
+  <tbody>
+
+    <tr>
+
+      <td>
+        Egreso del hotel
+      </td>
+
+      <td>
+        ${money(egresoHotel)}
+      </td>
+
+    </tr>
+
+    <tr>
+
+      <td>
+        Egreso de personal
+      </td>
+
+      <td>
+        ${money(egresoPersonal)}
+      </td>
+
+    </tr>
+
+    <tr class="row-total">
+
+      <td>
+        TOTAL EGRESOS
+      </td>
+
+      <td>
+        ${money(totalEgresos)}
+      </td>
+
+    </tr>
+
+  </tbody>
+
+</table>
+
+<div class="personal">
+
+  <div class="personal-title">
+    Consumo de personal — A cuenta
+  </div>
+
+  <div class="personal-description">
+    Productos consumidos de bodega pendientes de pago.
+  </div>
+
+  <div class="personal-line">
+
+    <span class="personal-label">
+      Total a cuenta
+    </span>
+
+    <strong class="personal-value">
+      ${money(totalConsumoPersonalCuenta)}
+    </strong>
+
+  </div>
+
+  <div
+    class="personal-description"
+    style="margin-top: 7px; margin-bottom: 0;"
+  >
+    * Este monto no afecta la Caja.<br>
+    * El stock sí fue descontado.
+  </div>
+
+</div>
+
+<div class="cash-control">
+
+  <div class="cash-control-title">
+    Control de efectivo
+  </div>
+
+  <div class="cash-line">
+
+    <span class="cash-line-label">
+      Caja inicial
+    </span>
+
+    <strong class="cash-line-value">
+      ${money(cajaInicial)}
+    </strong>
+
+  </div>
+
+  <div class="cash-line">
+
+    <span class="cash-line-label">
+      Ingresos en efectivo
+    </span>
+
+    <strong class="cash-line-value">
+      ${money(efectivoIngresosReales)}
+    </strong>
+
+  </div>
+
+  <div class="cash-line">
+
+    <span class="cash-line-label">
       Egresos de caja
-    </h2>
+    </span>
 
-    <table>
+    <strong class="cash-line-value">
+      -${money(totalEgresos)}
+    </strong>
 
-      <tbody>
+  </div>
 
-        <tr>
+  <div class="cash-line expected">
 
-          <td>
-            Egreso del hotel
-          </td>
+    <span class="cash-line-label">
+      Efectivo esperado en caja
+    </span>
 
-          <td>
-            ${money(egresoHotel)}
-          </td>
+    <strong class="cash-line-value">
+      ${money(efectivoEsperado)}
+    </strong>
 
-        </tr>
+  </div>
 
-        <tr>
+  <div class="cash-line found">
 
-          <td>
-            Egreso de personal
-          </td>
+    <span class="cash-line-label">
+      Efectivo encontrado
+    </span>
 
-          <td>
-            ${money(egresoPersonal)}
-          </td>
+    <strong class="cash-line-value">
+      ${moneyBlank(efectivoEncontrado)}
+    </strong>
 
-        </tr>
+  </div>
 
-        <tr class="row-total">
+  <div class="cash-line difference">
 
-          <td>
-            TOTAL EGRESOS
-          </td>
+    <span>
+      Diferencia
+    </span>
 
-          <td>
-            ${money(totalEgresos)}
-          </td>
+    <strong class="difference-value">
 
-        </tr>
-
-      </tbody>
-
-    </table>
-
-    <div class="personal">
-
-      <div class="personal-title">
-        Consumo de personal — A cuenta
-      </div>
-
-      <div class="personal-description">
-        Productos consumidos de bodega pendientes de pago.
-      </div>
-
-      <div class="personal-line">
-
-        <span class="personal-label">
-          Total a cuenta
-        </span>
-
-        <strong class="personal-value">
-          ${money(totalConsumoPersonalCuenta)}
-        </strong>
-
-      </div>
-
-      <div
-        class="personal-description"
-        style="margin-top: 7px; margin-bottom: 0;"
-      >
-        * Este monto no afecta la Caja.<br>
-        * El stock sí fue descontado.
-      </div>
-
-    </div>
-
-    <div class="cash-control">
-
-      <div class="cash-control-title">
-        Control de efectivo
-      </div>
-
-      <div class="cash-line">
-
-        <span class="cash-line-label">
-          Caja inicial
-        </span>
-
-        <strong class="cash-line-value">
-          ${money(cajaInicial)}
-        </strong>
-
-      </div>
-
-      <div class="cash-line">
-
-        <span class="cash-line-label">
-          Ingresos en efectivo
-        </span>
-
-        <strong class="cash-line-value">
-          ${money(efectivoIngresosReales)}
-        </strong>
-
-      </div>
-
-      <div class="cash-line">
-
-        <span class="cash-line-label">
-          Egresos de caja
-        </span>
-
-        <strong class="cash-line-value">
-          -${money(totalEgresos)}
-        </strong>
-
-      </div>
-
-      <div class="cash-line expected">
-
-        <span class="cash-line-label">
-          Efectivo esperado en caja
-        </span>
-
-        <strong class="cash-line-value">
-          ${money(efectivoEsperado)}
-        </strong>
-
-      </div>
-
-      <div class="cash-line found">
-
-        <span class="cash-line-label">
-          Efectivo encontrado
-        </span>
-
-        <strong class="cash-line-value">
-          ${moneyBlank(efectivoEncontrado)}
-        </strong>
-
-      </div>
-
-      <div class="cash-line difference">
-
-        <span>
-          Diferencia
-        </span>
-
-        <strong class="difference-value">
-
-          ${diferencia === null
+      ${diferencia === null
         ? 'S/ ______'
         : `${money(diferencia)} · ${differenceLabel}`
       }
 
-        </strong>
+    </strong>
 
-      </div>
+  </div>
 
-    </div>
+</div>
 
-    <div class="signatures">
+<div class="signatures">
 
-      <div class="signature">
-        Responsable que entrega
-      </div>
+  <div class="signature">
+    Responsable que entrega
+  </div>
 
-      <div class="signature">
-        Responsable que recibe
-      </div>
+  <div class="signature">
+    Responsable que recibe
+  </div>
 
-    </div>
+</div>
 
-    <div class="footer">
+<div class="footer">
 
-      Hotel Girasoles · Cierre generado el
+  Hotel Girasoles · Cierre generado el
 
-      ${this.escapeHtml(
+  ${this.escapeHtml(
         new Date().toLocaleString(
-          'es-PE'
+          'es-PE',
+          {
+            timeZone:
+              'America/Lima'
+          }
         )
       )}
 
-    </div>
+</div>
+
 
   </div>
 
@@ -4645,6 +5031,7 @@ export class CashComponent implements OnInit {
 
 </html>
 `;
+
 
     const reportWindow =
       window.open(
@@ -4668,15 +5055,14 @@ export class CashComponent implements OnInit {
     );
 
     reportWindow.document.close();
-  }
 
-  // =========================================================
-  // ESCAPAR HTML
-  // =========================================================
+
+  }
 
   private escapeHtml(
     value: string
   ): string {
+
 
     return String(
       value ?? ''
@@ -4701,5 +5087,7 @@ export class CashComponent implements OnInit {
         /'/g,
         '&#039;'
       );
+
+
   }
 }
