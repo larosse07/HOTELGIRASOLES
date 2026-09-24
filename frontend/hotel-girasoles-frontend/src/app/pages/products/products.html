@@ -5,16 +5,11 @@
        ===================================================== -->
 
   <div class="alert alert-error" *ngIf="error">
-
     ⚠️ {{ error }}
-
   </div>
 
-
   <div class="alert alert-success" *ngIf="success">
-
     ✅ {{ success }}
-
   </div>
 
 
@@ -83,7 +78,7 @@
 
 
   <!-- =====================================================
-       TABLA
+       INVENTARIO
        ===================================================== -->
 
   <section class="products-table-card">
@@ -104,6 +99,10 @@
 
     </div>
 
+
+    <!-- ===================================================
+         TABLA DESKTOP
+         =================================================== -->
 
     <div class="products-table-wrap">
 
@@ -267,6 +266,146 @@
         </tbody>
 
       </table>
+
+    </div>
+
+
+    <!-- ===================================================
+         CARDS MOBILE
+         =================================================== -->
+
+    <div class="products-mobile-list">
+
+      <div class="product-mobile-card" *ngFor="let product of filteredProducts">
+
+
+        <!-- HEADER DE CARD -->
+
+        <div class="product-mobile-header">
+
+          <div class="product-mobile-info">
+
+            <span class="product-mobile-name">
+              {{ product.name }}
+            </span>
+
+            <span class="product-mobile-category">
+              {{ getCategory(product) }}
+            </span>
+
+          </div>
+
+
+          <div class="product-mobile-actions-top">
+
+            <button type="button" class="btn-action btn-edit" (click)="openEditProduct(product)"
+              title="Editar producto">
+
+              ✏️
+
+            </button>
+
+            <button type="button" class="btn-action btn-delete" (click)="deleteProduct(product)"
+              title="Eliminar producto">
+
+              🗑️
+
+            </button>
+
+          </div>
+
+        </div>
+
+
+        <!-- INFORMACIÓN -->
+
+        <div class="product-mobile-info-grid">
+
+          <div class="product-mobile-info-item">
+
+            <span>
+              PRECIO
+            </span>
+
+            <strong>
+              S/ {{ product.price | number:'1.2-2' }}
+            </strong>
+
+          </div>
+
+
+          <div class="product-mobile-info-item">
+
+            <span>
+              STOCK
+            </span>
+
+            <strong>
+              {{ product.stock }}
+            </strong>
+
+          </div>
+
+        </div>
+
+
+        <!-- ESTADO -->
+
+        <div class="product-mobile-status">
+
+          <span class="stock-status" [ngClass]="getStockClass(product)">
+
+            {{ getStockLabel(product) }}
+
+          </span>
+
+        </div>
+
+
+        <!-- AGREGAR STOCK -->
+
+        <div class="product-mobile-stock-action">
+
+          <button type="button" class="btn-stock" (click)="openAddStock(product)" title="Agregar stock">
+
+            + Stock
+
+          </button>
+
+        </div>
+
+      </div>
+
+
+      <!-- =================================================
+           SIN PRODUCTOS MOBILE
+           ================================================= -->
+
+      <div *ngIf="filteredProducts.length === 0" class="empty-products">
+
+        <div class="empty-icon">
+          📦
+        </div>
+
+        <strong>
+          {{ searchTerm
+          ? 'No se encontraron productos'
+          : 'No hay productos registrados' }}
+        </strong>
+
+        <span>
+          {{ searchTerm
+          ? 'Prueba con otro nombre.'
+          : 'Crea tu primer producto para comenzar.' }}
+        </span>
+
+        <button *ngIf="!searchTerm" type="button" class="btn-primary empty-button" (click)="openCreateProduct()">
+
+          + Crear producto
+
+        </button>
+
+      </div>
 
     </div>
 
